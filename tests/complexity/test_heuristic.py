@@ -74,10 +74,14 @@ def test_heuristic_filename_detection_still_works(route_mod):
     assert "S" in unsure
 
 
-def test_cli_score_reports_truncation_without_disturbing_the_route_line(run_cli):
+def test_cli_score_reports_truncation_without_disturbing_the_route_line(route_mod, run_cli):
     """(b): note the truncation in the existing 'note:' line, and only there --
-    the routing one-liner that follows (what the hook parses) must be unaffected."""
-    huge_task = "a" * 200_000
+    the routing one-liner that follows (what the hook parses) must be unaffected.
+
+    Linux limits a single command-line argument to 128 KiB (MAX_ARG_STRLEN), so we
+    use a task that is over the heuristic's bound (HEURISTIC_TASK_MAX_CHARS) but well
+    under the platform limit."""
+    huge_task = "a" * (route_mod.HEURISTIC_TASK_MAX_CHARS + 5000)
     result = run_cli("score", "--task", huge_task, "--route", "--no-log", "--kind", "implement")
     assert result.returncode == 0, result.stderr
     lines = [l for l in result.stdout.splitlines() if l.strip()]
