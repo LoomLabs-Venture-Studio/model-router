@@ -1,0 +1,58 @@
+{
+  "skill_name": "complexity",
+  "evals": [
+    {
+      "id": 0,
+      "name": "rename-across-repo",
+      "prompt": "rename get_user to fetch_user across the repo",
+      "expected_output": "A complexity card with all seven scores, a low tier (haiku, or inline), no fan-out, tests run as the check, no verifier, and the decision logged with an id.",
+      "files": [
+        "fixture/shopapi"
+      ],
+      "assertions": [
+        "States all seven complexity scores (S, R, A, K, I, P, V) explicitly with values",
+        "The executing piece is inline or a haiku-tier agent, not sonnet/opus/fable",
+        "Does not fan out to multiple parallel agents",
+        "Names a deterministic acceptance check (zero-hit grep, compile, or tests) rather than a judgment review",
+        "No verifier agent and no human gate are added for this low-risk rename",
+        "The decision is recorded in a machine-readable log with an id (decisions.jsonl contains a decision line)"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "intermittent-500s-checkout",
+      "prompt": "we're seeing intermittent 500s on /checkout under load. find the cause and fix it.",
+      "expected_output": "A card scoring reasoning high and risk at 2 (payments), an opus or fable tier, a scoping probe or explicit diagnosis step before the fix, an independent verifier, and a review gate rather than a direct deploy; diagnosis kept close to the user rather than blindly fanned out.",
+      "files": [
+        "fixture/shopapi"
+      ],
+      "assertions": [
+        "States all seven complexity scores (S, R, A, K, I, P, V) explicitly with values",
+        "The executing model for the diagnosis/fix is opus or fable (not haiku or sonnet)",
+        "Includes a scoping or diagnosis step before committing to a fix approach",
+        "Adds an independent verifier that receives the diff and the task but not the reasoning behind the fix",
+        "Names a review/merge gate and rules out a direct deploy, acknowledging the payments/data risk",
+        "Does not fan the diagnosis out to parallel agents",
+        "The decision is recorded in a machine-readable log with an id (decisions.jsonl contains a decision line)"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "auth-audit-fan-out",
+      "prompt": "audit every route handler for missing auth checks and give me a report",
+      "expected_output": "A card with high parallelism and scope, a fan-out with a shard count and a fixed per-shard return schema, shards no cheaper than sonnet because auth is K2, an inline reduce, and an independent verifier on the merged report.",
+      "files": [
+        "fixture/shopapi"
+      ],
+      "assertions": [
+        "States all seven complexity scores (S, R, A, K, I, P, V) explicitly with values",
+        "No piece of the audit runs on haiku; the auditing model is sonnet or better because auth is risk 2",
+        "Adds an independent verifier for the report, aimed at catching confident false negatives",
+        "Specifies a fixed per-handler return schema (columns such as handler, file:line, auth present, evidence)",
+        "Sizes the repo (counts handlers or route modules) before choosing between fan-out and a single agent",
+        "The fan-out vs single-agent choice is stated with a reason tied to shard size or independence",
+        "The decision is recorded in a machine-readable log with an id (decisions.jsonl contains a decision line)"
+      ]
+    }
+  ]
+}

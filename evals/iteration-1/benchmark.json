@@ -1,0 +1,379 @@
+{
+  "metadata": {
+    "skill_name": "complexity",
+    "skill_path": "<path/to/skill>",
+    "executor_model": "<model-name>",
+    "analyzer_model": "<model-name>",
+    "timestamp": "2026-09-19T15:54:45Z",
+    "evals_run": [
+      0,
+      1,
+      2
+    ],
+    "runs_per_configuration": 3
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 217.4,
+        "tokens": 104164,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "States all seven complexity scores (S, R, A, K, I, P, V) explicitly with values",
+          "passed": true,
+          "evidence": "decision.md's card reads 'complexity  S2 R0 A0 K1 I2 P0 V1  kind=implement  difficulty 1/9'; decisions.jsonl independently confirms scores_given: {S:2, R:0, A:0, K:1, I:2, P:0, V:1}. All seven letters appear with numeric values in both the human-facing card and the machine log, and match the skill's own worked example for this exact task in complexity/SKILL.md ('Rename getUser to fetchUser everywhere. S2 R0 A0 K1 I2 P0 V1')."
+        },
+        {
+          "text": "The executing piece is inline or a haiku-tier agent, not sonnet/opus/fable",
+          "passed": true,
+          "evidence": "'route  single agent \u00b7 general-purpose \u00b7 haiku \u00b7 effort default' and 'Mode: one foreground Agent call, subagent_type: general-purpose, model: haiku (set explicitly; do not inherit the session model)'; decisions.jsonl has model: 'haiku'. The mechanical edits are delegated to a haiku subagent, with the brief explicitly noting the session's own (larger) model is NOT to be inherited -- the opposite of the without_skill run's choice."
+        },
+        {
+          "text": "Does not fan out to multiple parallel agents",
+          "passed": true,
+          "evidence": "decisions.jsonl mode: 'single'; decision.md dispatch plan is 'one foreground Agent call'. Exactly one agent is dispatched; no parallel Agent calls anywhere in the document."
+        },
+        {
+          "text": "Names a deterministic acceptance check (zero-hit grep, compile, or tests) rather than a judgment review",
+          "passed": true,
+          "evidence": "'Done means' 1-4 in the brief: '`grep -rn get_user ... returns zero lines`', '`grep -rn fetch_user ... returns 15 lines in 7 files`', '`python3 -m py_compile ... exits 0`', and a stdlib import check -- all deterministic pass/fail checks; pytest is listed as informational only ('Do not try to make them pass'), not as a judgment review."
+        },
+        {
+          "text": "No verifier agent and no human gate are added for this low-risk rename",
+          "passed": true,
+          "evidence": "decision.md: 'verifier    none'; decisions.jsonl: verifier: null, gate: null."
+        },
+        {
+          "text": "The decision is recorded in a machine-readable log with an id (decisions.jsonl contains a decision line)",
+          "passed": true,
+          "evidence": "with_skill/outputs/decisions.jsonl exists (727 bytes) and contains one JSON line: {\"id\": \"c-0fdae2\", \"ts\": \"2026-09-19T15:42:23+00:00\", ... \"event\": \"decision\", ...}, matching the id 'c-0fdae2' cited throughout decision.md."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 314.9,
+        "tokens": 122645,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "States all seven complexity scores (S, R, A, K, I, P, V) explicitly with values",
+          "passed": true,
+          "evidence": "decision.md:13 'complexity  S2? R3 A2 K2 I1 P0 V2' (Pass 1) and decision.md:38 'complexity  S1 R3 A1 K2 I1 P0 V2' (Pass 2, re-scored) both give all seven letters with numeric values. decisions.jsonl mirrors both exactly: line 1 scores_given {\"S\":2,\"R\":3,\"A\":2,\"K\":2,\"I\":1,\"P\":0,\"V\":2}, line 2 {\"S\":1,\"R\":3,\"A\":1,\"K\":2,\"I\":1,\"P\":0,\"V\":2}."
+        },
+        {
+          "text": "The executing model for the diagnosis/fix is opus or fable (not haiku or sonnet)",
+          "passed": true,
+          "evidence": "decision.md:4 'Session model: Fable 5.1.' The chosen route is 'inline' with the reasoning at decision.md:46 'This session is Fable, above the opus floor, so no implementer agent is needed.' The only mention of haiku is for a size-only, read-only probe (decision.md:13) that was in fact executed inline by the Fable session itself rather than dispatched ('I ran the probe myself instead', decision.md:23) \u2014 no diagnosis or fix work is attributed to haiku or sonnet anywhere."
+        },
+        {
+          "text": "Includes a scoping or diagnosis step before committing to a fix approach",
+          "passed": true,
+          "evidence": "Explicit 'Pass 1: the task as posed' (initial scoring) is followed by a 'Probe result' section (decision.md:23-33) that reads the real repo and records file:line facts, before 'Pass 2: re-scored after the probe' (decision.md:35) commits to the inline-fix route. Verified independently against /home/claude/complexity-workspace/fixture/shopapi: every cited file:line (db.py:2-3, checkout.py:8,12,16,18-21, pricing.py:4, admin.py's missing require_admin call) matches the real source exactly, and the stated repo size ('15 files, 146 lines') is exactly correct (confirmed via wc)."
+        },
+        {
+          "text": "Adds an independent verifier that receives the diff and the task but not the reasoning behind the fix",
+          "passed": true,
+          "evidence": "Step 2 verifier brief (decision.md:139-180): 'Artifact: the uncommitted working-tree changes ... Get them with `git status --short` and `git diff` ... You have not seen how the change was produced; judge it on its own.' It restates the original task and gives only generic architectural context (threadpool model, endpoint location, schema location) \u2014 it never states the claimed root causes or the fix design. The 'Check' list poses open, unanswered questions ('Is every DB access either serialized or per-thread?', 'Are the payment insert and the cart delete committed together or not at all?') rather than asserting what the bug or fix were, so the verifier genuinely has to work it out from the diff."
+        },
+        {
+          "text": "Names a review/merge gate and rules out a direct deploy, acknowledging the payments/data risk",
+          "passed": true,
+          "evidence": "'gate K2: changes ship through review, no direct deploy' appears on both score cards (decision.md:14,39); prose states 'the change goes out through normal PR review, not a direct deploy' (decision.md:50) and the dispatch table lists 'gate | K2 | Changes ship through PR review; I do not commit, push, or deploy' (decision.md:62). K2 is explicitly tied to payments risk: 'K2 (\"checkout writes payments\")' (decision.md:21); the verifier brief separately flags 'The payments table is money-adjacent data' (decision.md:153)."
+        },
+        {
+          "text": "Does not fan the diagnosis out to parallel agents",
+          "passed": true,
+          "evidence": "Explicit: 'No fan-out: the pieces share db.py's interface and are not independent' (decision.md:46), and the dispatch table's 'Not used' row lists 'fan-out (P0)' (decision.md:64). The plan has exactly one probe (executed inline, not even dispatched as an agent), one inline fix, and one sequential verifier agent \u2014 no parallel Agent/Task calls anywhere in the plan."
+        },
+        {
+          "text": "The decision is recorded in a machine-readable log with an id (decisions.jsonl contains a decision line)",
+          "passed": true,
+          "evidence": "outputs/decisions.jsonl exists with two valid JSON lines, each with \"event\": \"decision\" and a unique \"id\" (c-29b430, c-41ce3c) plus full scoring/routing fields. decision.md cross-references the same ids ('id c-29b430', 'id c-41ce3c') and points at the log file, so the human-readable doc and the machine log agree."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 298.9,
+        "tokens": 114572,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "States all seven complexity scores (S, R, A, K, I, P, V) explicitly with values",
+          "passed": true,
+          "evidence": "decision.md section 1 states 'complexity  S2 R2 A1 K2 I3 P0 V2  kind=review  difficulty 5/9' -- all seven letters with numeric values. decisions.jsonl backs this: both logged decisions carry scores_used with all seven keys (final one: {S:2, R:2, A:1, K:2, I:3, P:0, V:2})."
+        },
+        {
+          "text": "No piece of the audit runs on haiku; the auditing model is sonnet or better because auth is risk 2",
+          "passed": true,
+          "evidence": "Dispatch table assigns sonnet to both Step 1 (Audit) and Step 2 (Verify). Text: 'K2 forbids haiku; nothing in a 92-line audit needs opus.' R is explicitly scored 2 (vs. the worked example's R1) with reasoning that require_admin is a body call invisible to a signature scan, and K2 (consequence of a wrong report) is what floors the tier at sonnet. No haiku appears anywhere in the plan; the only escalation path on disagreement goes up to opus, never down."
+        },
+        {
+          "text": "Adds an independent verifier for the report, aimed at catching confident false negatives",
+          "passed": true,
+          "evidence": "Step 2 dispatches a second, independent sonnet agent whose brief states verbatim: 'The expensive failure is a confident false negative, so check every OK row hardest,' and explicitly sequences it to build its own table from the source files 'and do not read the report's verdict column until step 2' -- independence by construction, not just by label."
+        },
+        {
+          "text": "Specifies a fixed per-handler return schema (columns such as handler, file:line, auth present, evidence)",
+          "passed": true,
+          "evidence": "Auditor brief's 'Return' section specifies literally: 'handler | method+path | file:line | authn (yes/no) | authz needed (...) | authz present (yes/no/n.a.) | verdict (OK/GAP/NEEDS-DECISION) | evidence (file:line of the check, or of the site where it is missing)' -- a fixed schema that names file:line, auth-present, and evidence columns exactly."
+        },
+        {
+          "text": "Sizes the repo (counts handlers or route modules) before choosing between fan-out and a single agent",
+          "passed": true,
+          "evidence": "A probe (decision c-eaae4b) is dispatched first because 'S and P unsure until the handlers are counted'; it reports '6 route modules, 11 handlers (@router.* decorators), 92 lines of route code' -- independently confirmed against the real fixture (grep finds exactly 11 @router decorators across 6 files; the six route files sum to exactly 92 lines). Only after this does the single-agent decision (c-79df6d) get made."
+        },
+        {
+          "text": "The fan-out vs single-agent choice is stated with a reason tied to shard size or independence",
+          "passed": true,
+          "evidence": "'P0 (6 modules, 11 handlers, 92 lines) killed the fan-out that the generic scoring for this prompt (S3 P3, 6-8 shards) would give.' Rationale section: 'six shard briefs would each be longer than the code they audit, and the judgments that matter here ... are cross-module patterns that one reader who sees every handler catches once, where six shards each rediscover or miss them' -- ties the choice to both shard size (briefs longer than the code) and independence (cross-module patterns aren't shard-local)."
+        },
+        {
+          "text": "The decision is recorded in a machine-readable log with an id (decisions.jsonl contains a decision line)",
+          "passed": true,
+          "evidence": "outputs/decisions.jsonl exists with 2 valid JSON lines, each carrying a unique id (c-eaae4b, c-79df6d), 'event': 'decision', and full score/model/mode fields."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 0,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.5,
+        "passed": 3,
+        "failed": 3,
+        "total": 6,
+        "time_seconds": 159.8,
+        "tokens": 85947,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "States all seven complexity scores (S, R, A, K, I, P, V) explicitly with values",
+          "passed": false,
+          "evidence": "Full read of without_skill/outputs/decision.md finds no S/R/A/K/I/P/V rubric notation anywhere. The document reasons entirely in prose and a per-file occurrence table ('| File | Occurrences | Kind |'); it never states a complexity card or letter-scored values. Confirmed by `grep -n \"S[0-9].*R[0-9]\"` (the pattern that matches instantly in the with_skill file) returning nothing in this file."
+        },
+        {
+          "text": "The executing piece is inline or a haiku-tier agent, not sonnet/opus/fable",
+          "passed": false,
+          "evidence": "decision.md states execution is '**Doing this inline -- no subagents, no verifier agent, no approval gate.**' and explicitly: '**Assignment:** main session, inline, on the session model (Fable 5.1).' The piece that would actually perform the 15 edits is the session's own model, self-identified as Fable -- one of the three tiers ('sonnet/opus/fable') the assertion names as disallowed. A haiku-tier subagent brief does exist in section 2b, but it is explicitly marked 'NOT sent (contingency)', so it does not change what the run actually designates as the executor. See eval_feedback for the genuine ambiguity in this assertion's wording; this verdict follows the reading most consistent with the skill's own text (references/routing-policy.md: '\"Inline\" assumes the session model is at least the tier') and with the skill's worked example for this identical task, which routes to a single haiku agent rather than inline."
+        },
+        {
+          "text": "Does not fan out to multiple parallel agents",
+          "passed": true,
+          "evidence": "'**Doing this inline -- no subagents, no verifier agent, no approval gate.**' Only one execution path (inline) is actually used; the alternative haiku brief in section 2b is explicitly not dispatched, so at most one piece ever executes -- no fan-out."
+        },
+        {
+          "text": "Names a deterministic acceptance check (zero-hit grep, compile, or tests) rather than a judgment review",
+          "passed": true,
+          "evidence": "'Step 2 -- Verify (all deterministic; every one must pass)' lists: (a) zero-hit `grep -rn get_user`, (b) 15-line `grep -rn fetch_user`, (c) `python3 -m compileall -q` exit 0, (d) an import smoke test, (e) `git diff --stat` == 7 files. All deterministic pass/fail checks, not a model-judgment review."
+        },
+        {
+          "text": "No verifier agent and no human gate are added for this low-risk rename",
+          "passed": true,
+          "evidence": "'Doing this inline -- no subagents, no verifier agent, no approval gate.' and '**Separate verifier:** none. **Human gate before execution:** none; the user reviews the diff after.'"
+        },
+        {
+          "text": "The decision is recorded in a machine-readable log with an id (decisions.jsonl contains a decision line)",
+          "passed": false,
+          "evidence": "without_skill/outputs/ contains only decision.md; no decisions.jsonl file exists anywhere under without_skill/ (confirmed via directory listing and a recursive `find`). No id is assigned and no machine-readable log entry is produced -- the decision exists only as prose in a markdown file."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.57,
+        "passed": 4,
+        "failed": 3,
+        "total": 7,
+        "time_seconds": 266.0,
+        "tokens": 95212,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "States all seven complexity scores (S, R, A, K, I, P, V) explicitly with values",
+          "passed": false,
+          "evidence": "No complexity-score notation appears anywhere in decision.md. A full-text search for the S/R/A/K/I/P/V letter-plus-digit pattern and for 'complexity', 'difficulty', 'tier', 'score' finds only unrelated matches (file paths containing the word 'complexity-workspace', the commit hash). The routing rationale (section 3) reasons qualitatively ('small enough', 'coupled and short') but never assigns or states the seven-dimension scores."
+        },
+        {
+          "text": "The executing model for the diagnosis/fix is opus or fable (not haiku or sonnet)",
+          "passed": true,
+          "evidence": "decision.md:29 'Piece A: diagnosis \u2014 done inline (fable, this session)' and decision.md:33 'Piece B: fix + repro test \u2014 inline (fable, this session)' both explicitly name Fable as the session doing the diagnosis and fix; the separately-dispatched verifier is at 'model opus' (decision.md:55). No diagnosis or fix work is attributed to haiku or sonnet."
+        },
+        {
+          "text": "Includes a scoping or diagnosis step before committing to a fix approach",
+          "passed": true,
+          "evidence": "Section 1 opens with 'What I found. I read the whole codebase (it is 11 files)' followed by three numbered root-cause findings with file:line citations (decision.md:9-15), and only then states 'How I will handle it: fix inline, then one verifier subagent' (decision.md:17). Verified independently against /home/claude/complexity-workspace/fixture/shopapi \u2014 the file:line citations (checkout.py:18-21, checkout.py:16, db.py's shared connection and unused _lock) match the real source."
+        },
+        {
+          "text": "Adds an independent verifier that receives the diff and the task but not the reasoning behind the fix",
+          "passed": false,
+          "evidence": "The Piece C verifier brief (decision.md:57-126) contains an explicit 'CLAIMED ROOT CAUSES (verify each independently; do not take my word for it)' section spelling out all three diagnosed bugs in full (decision.md:68-71), followed by a 'CLAIMED FIX' section (decision.md:73) describing exactly how the fix addresses each one. This hands the verifier the complete reasoning/explanation behind the fix before it looks at any code \u2014 the brief's own framing ('do not take my word for it') does not undo the fact that the word was already given. This is the opposite of a blind review and fails the independence requirement as strictly defined."
+        },
+        {
+          "text": "Names a review/merge gate and rules out a direct deploy, acknowledging the payments/data risk",
+          "passed": true,
+          "evidence": "'Human gate: at merge, not before the fix. I will hand back a diff plus before/after evidence from the verifier, not a deploy.' (decision.md:23). Payments/data risk is acknowledged earlier in the same section: the _inflight race 'also double-charges (both requests read the cart, both insert a payments row, both clear the cart)' (decision.md:11), and the verifier brief separately calls the payments table 'money-adjacent data' (decision.md context around line 62-66)."
+        },
+        {
+          "text": "Does not fan the diagnosis out to parallel agents",
+          "passed": true,
+          "evidence": "'No fan-out. The three defects share two files and one repro harness; parallel agents would collide on the same lines and each would need the full read I have already done.' (decision.md:132, under 'Not dispatched'). Diagnosis and fix are both done inline by the single session; exactly one verifier subagent is dispatched afterward \u2014 no parallel Agent/Task calls."
+        },
+        {
+          "text": "The decision is recorded in a machine-readable log with an id (decisions.jsonl contains a decision line)",
+          "passed": false,
+          "evidence": "outputs/ for this run contains only decision.md \u2014 no decisions.jsonl file exists anywhere under /home/claude/complexity-workspace/iteration-1/intermittent-500s-checkout/without_skill/outputs (confirmed by directory listing), and decision.md never mentions a decision id or a machine-readable log at all."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.43,
+        "passed": 3,
+        "failed": 4,
+        "total": 7,
+        "time_seconds": 156.2,
+        "tokens": 87072,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "States all seven complexity scores (S, R, A, K, I, P, V) explicitly with values",
+          "passed": false,
+          "evidence": "decision.md contains no complexity-score notation anywhere -- no S/R/A/K/I/P/V letters with numeric values. Reasoning is entirely prose-based (handler counts, read-only status, context-locality, cost/benefit of a stronger or weaker model) with no scoring rubric at all."
+        },
+        {
+          "text": "No piece of the audit runs on haiku; the auditing model is sonnet or better because auth is risk 2",
+          "passed": false,
+          "evidence": "The audit itself runs inline as 'Fable (the session model)'; no explicit tier (sonnet/opus/haiku) is ever assigned to the entity actually doing the audit, so 'sonnet or better' is never established. No risk score of any kind is computed, so there is no 'auth is risk 2' reasoning to tie a model choice to. The only model tier named anywhere in the document is Haiku, proposed (though not dispatched) for a verifier -- the one place a tier is named for auth-adjacent work, it is the cheapest tier, not a sonnet floor."
+        },
+        {
+          "text": "Adds an independent verifier for the report, aimed at catching confident false negatives",
+          "passed": false,
+          "evidence": "Explicitly declined: 'Verifier: no separate verifier agent ... A grep does that job as well as an agent would,' and the dispatch table lists 'Verifier agent | Not dispatched.' A verifier brief is drafted but marked 'NOT dispatched; kept for reference' for a future threshold ('roughly >40 handlers or >8 route files') this run doesn't cross. No independent verifier is actually added."
+        },
+        {
+          "text": "Specifies a fixed per-handler return schema (columns such as handler, file:line, auth present, evidence)",
+          "passed": true,
+          "evidence": "The brief's 'REPORT FORMAT' section specifies a fixed table: 'Severity | Method+Path | File:line | Authn | Authz | Classification | What an attacker can do,' with File:line and Authn (auth-present) as named columns and explicit per-field instructions to cite line numbers for every claim."
+        },
+        {
+          "text": "Sizes the repo (counts handlers or route modules) before choosing between fan-out and a single agent",
+          "passed": true,
+          "evidence": "'the whole route surface is 11 handlers across 6 files (~70 lines of route code) plus a 12-line auth module ... I've already read all of it while scoping' -- sizing is stated and used causally to justify the inline/single-pass decision before it is finalized. (11 handlers / 6 files matches the actual fixture exactly; the '~70 lines' route-code figure is inaccurate, see claims below.)"
+        },
+        {
+          "text": "The fan-out vs single-agent choice is stated with a reason tied to shard size or independence",
+          "passed": true,
+          "evidence": "'Fan-out considered and rejected: partitioning by route file (6 partitions of 5-20 lines each) would produce six readers who each lack core/auth.py context and can't see cross-file patterns; merging six differently-calibrated severity scales is more work than the audit.' Ties the choice directly to both shard size and cross-file independence."
+        },
+        {
+          "text": "The decision is recorded in a machine-readable log with an id (decisions.jsonl contains a decision line)",
+          "passed": false,
+          "evidence": "No decisions.jsonl file exists anywhere under without_skill/outputs (the directory contains only decision.md; the sibling directory contains only timing.json). Nothing machine-readable or id-bearing was logged."
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1.0,
+        "stddev": 0.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 277.0667,
+        "stddev": 52.2885,
+        "min": 217.4,
+        "max": 314.9
+      },
+      "tokens": {
+        "mean": 113793.6667,
+        "stddev": 9265.0522,
+        "min": 104164,
+        "max": 122645
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.5,
+        "stddev": 0.07,
+        "min": 0.43,
+        "max": 0.57
+      },
+      "time_seconds": {
+        "mean": 194.0,
+        "stddev": 62.3798,
+        "min": 156.2,
+        "max": 266.0
+      },
+      "tokens": {
+        "mean": 89410.3333,
+        "stddev": 5055.7797,
+        "min": 85947,
+        "max": 95212
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.50",
+      "time_seconds": "+83.1",
+      "tokens": "+24383"
+    }
+  },
+  "notes": [
+    "Two assertions per eval (all seven scores stated; decision logged with an id) are skill-mechanism checks that the baseline cannot pass by construction. Excluding them, with-skill still leads: haiku instead of Fable for the rename, a verifier that is actually blind to the fix reasoning for the 500s (baseline handed its verifier the claimed root causes), and a dispatched verifier for the auth audit (baseline substituted a grep cross-check).",
+    "The fan-out path was never exercised: the fixture is 146 lines, so both with-skill runs probed, re-scored P to 0, and chose a single agent. That is the correct behavior and a good sign for the probe rule, but it means shard briefs, shard tier flooring, and the reduce step are untested. Iteration 2 needs a fixture with 40+ handlers across 10+ modules.",
+    "Routing tax: with-skill runs averaged +83s and +24k tokens, from reading SKILL.md plus all three references and running route.py twice. Small against real work, but the skill should say to read brief-template.md only when delegating and to score S from cheap signals (grep counts, file lists) rather than reading the repo, since the reading is the thing being delegated.",
+    "Baseline decisions from a Fable session were sensible in prose. The measurable gap is consistency, auditability, and cheaper tiering, not raw judgment. Expect the skill to matter more on sonnet-tier sessions and in long sessions where context protection compounds.",
+    "Eval quality: the rename assertion 'inline or haiku' is ambiguous when the session model is Fable (inline on Fable technically fails it). Reword for iteration 2. No assertion checks that the stated scores are consistent with the route chosen; add one."
+  ]
+}

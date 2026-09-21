@@ -1,0 +1,14 @@
+{
+  "eval_id": 1,
+  "eval_name": "intermittent-500s-checkout",
+  "prompt": "we're seeing intermittent 500s on /checkout under load. find the cause and fix it.",
+  "assertions": [
+    "States all seven complexity scores (S, R, A, K, I, P, V) explicitly with values",
+    "The executing model for the diagnosis/fix is opus or fable (not haiku or sonnet)",
+    "Includes a scoping or diagnosis step before committing to a fix approach",
+    "Adds an independent verifier that receives the diff and the task but not the reasoning behind the fix",
+    "Names a review/merge gate and rules out a direct deploy, acknowledging the payments/data risk",
+    "Does not fan the diagnosis out to parallel agents",
+    "The decision is recorded in a machine-readable log with an id (decisions.jsonl contains a decision line)"
+  ]
+}

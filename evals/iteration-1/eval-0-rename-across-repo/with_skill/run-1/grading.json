@@ -1,0 +1,90 @@
+{
+  "expectations": [
+    {
+      "text": "States all seven complexity scores (S, R, A, K, I, P, V) explicitly with values",
+      "passed": true,
+      "evidence": "decision.md's card reads 'complexity  S2 R0 A0 K1 I2 P0 V1  kind=implement  difficulty 1/9'; decisions.jsonl independently confirms scores_given: {S:2, R:0, A:0, K:1, I:2, P:0, V:1}. All seven letters appear with numeric values in both the human-facing card and the machine log, and match the skill's own worked example for this exact task in complexity/SKILL.md ('Rename getUser to fetchUser everywhere. S2 R0 A0 K1 I2 P0 V1')."
+    },
+    {
+      "text": "The executing piece is inline or a haiku-tier agent, not sonnet/opus/fable",
+      "passed": true,
+      "evidence": "'route  single agent \u00b7 general-purpose \u00b7 haiku \u00b7 effort default' and 'Mode: one foreground Agent call, subagent_type: general-purpose, model: haiku (set explicitly; do not inherit the session model)'; decisions.jsonl has model: 'haiku'. The mechanical edits are delegated to a haiku subagent, with the brief explicitly noting the session's own (larger) model is NOT to be inherited -- the opposite of the without_skill run's choice."
+    },
+    {
+      "text": "Does not fan out to multiple parallel agents",
+      "passed": true,
+      "evidence": "decisions.jsonl mode: 'single'; decision.md dispatch plan is 'one foreground Agent call'. Exactly one agent is dispatched; no parallel Agent calls anywhere in the document."
+    },
+    {
+      "text": "Names a deterministic acceptance check (zero-hit grep, compile, or tests) rather than a judgment review",
+      "passed": true,
+      "evidence": "'Done means' 1-4 in the brief: '`grep -rn get_user ... returns zero lines`', '`grep -rn fetch_user ... returns 15 lines in 7 files`', '`python3 -m py_compile ... exits 0`', and a stdlib import check -- all deterministic pass/fail checks; pytest is listed as informational only ('Do not try to make them pass'), not as a judgment review."
+    },
+    {
+      "text": "No verifier agent and no human gate are added for this low-risk rename",
+      "passed": true,
+      "evidence": "decision.md: 'verifier    none'; decisions.jsonl: verifier: null, gate: null."
+    },
+    {
+      "text": "The decision is recorded in a machine-readable log with an id (decisions.jsonl contains a decision line)",
+      "passed": true,
+      "evidence": "with_skill/outputs/decisions.jsonl exists (727 bytes) and contains one JSON line: {\"id\": \"c-0fdae2\", \"ts\": \"2026-09-19T15:42:23+00:00\", ... \"event\": \"decision\", ...}, matching the id 'c-0fdae2' cited throughout decision.md."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "output_chars": 8680,
+    "transcript_chars": null,
+    "note": "No transcript file exists for this eval (grading is based on outputs_dir per the task instructions); no metrics.json was produced by the executor. output_chars = decision.md (7953B) + decisions.jsonl (727B)."
+  },
+  "claims": [
+    {
+      "claim": "get_user occurs 15 times across exactly 7 files (app/core/users.py, app/core/pricing.py, app/routes/users.py, app/routes/orders.py, app/routes/checkout.py, app/routes/admin.py, tests/test_users.py)",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Independently re-ran `grep -rn get_user --include=*.py .` against the live fixture at /home/claude/complexity-workspace/fixture/shopapi: exactly 15 matching lines across exactly those 7 files, matching the brief's line-by-line list verbatim."
+    },
+    {
+      "claim": "There are no get_users, get_user_by_*, _get_user, or string-literal occurrences, so a plain substitution over the 7 files is safe",
+      "type": "factual",
+      "verified": true,
+      "evidence": "`grep -rnE \"get_users|get_user_by|_get_user\"` on the fixture returns only `tests/test_users.py:3: def test_get_user_missing():` -- the one occurrence the brief already accounts for by explicitly renaming that test. No unaccounted-for affixed identifiers exist."
+    },
+    {
+      "claim": "Both tests already fail at baseline with sqlite3.OperationalError: no such table: users, and pytest/fastapi are not installed",
+      "type": "process",
+      "verified": true,
+      "evidence": "Confirmed pytest and fastapi are both absent (`python3 -c \"import pytest\"` / `import fastapi` both raise ModuleNotFoundError), and no conftest.py, pytest.ini, or pyproject.toml exists anywhere in the fixture to apply migrations/001_init.sql, so the `users` table would never exist when the tests run."
+    },
+    {
+      "claim": "Importing app.core.db creates shop.db in the cwd as a side effect",
+      "type": "factual",
+      "verified": true,
+      "evidence": "app/core/db.py runs `sqlite3.connect(\"shop.db\", ...)` at module import time, and app/core/users.py (transitively pricing.py) imports from app.core.db, so importing either does create shop.db in the cwd."
+    },
+    {
+      "claim": "A plain global replace within those 7 files is safe and also renames the test to match",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Given the two factual claims above both hold (exact 15/7 count, no unintended collisions), an `s/get_user/fetch_user/g` restricted to the 7 named files changes only the intended identifier plus the one test name the brief calls out -- a justified conclusion, not an unsupported assertion."
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "The executing piece is inline or a haiku-tier agent, not sonnet/opus/fable",
+        "reason": "This run sidesteps the ambiguity cleanly (it dispatches an explicit haiku Agent and explicitly declines to inherit the session model), but the assertion's 'inline' escape hatch is genuinely ambiguous in this fixture, where the executing session always self-identifies as a top-tier model ('Fable'). Read literally, any baseline run that simply never spawns a subagent -- the default behavior of an unguided agent -- would pass via the 'inline' clause regardless of which model does the work, which is precisely what happened in the without_skill run for this same eval. Consider rephrasing to something that can't be satisfied by 'the session's own large model did it directly,' e.g. 'the model tier that actually performs the edits, whether inline or delegated, is no larger than haiku.'"
+      },
+      {
+        "assertion": "States all seven complexity scores (S, R, A, K, I, P, V) explicitly with values",
+        "reason": "This only checks that seven lettered values are present, not that they are grounded in an actual finding. This run's scores happen to be well-evidenced (backed by a real grep, cited inline), but a fabricated 'S2 R0 A0 K1 I2 P0 V1' with no supporting search would pass identically. Consider requiring the S score specifically to be traceable to a stated occurrence/file count."
+      }
+    ],
+    "overall": "This run passes all six assertions with substantive, non-coincidental evidence (the scores, the file list, and the routing all independently verify against the live fixture repo). The eval's weak point is assertion 2's phrasing, which only avoided passing a session-model-does-the-work outcome in this run because the run happened to choose delegation, not because the assertion text rules that outcome out unambiguously."
+  }
+}

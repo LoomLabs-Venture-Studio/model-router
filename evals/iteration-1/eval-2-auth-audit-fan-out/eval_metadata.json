@@ -1,0 +1,14 @@
+{
+  "eval_id": 2,
+  "eval_name": "auth-audit-fan-out",
+  "prompt": "audit every route handler for missing auth checks and give me a report",
+  "assertions": [
+    "States all seven complexity scores (S, R, A, K, I, P, V) explicitly with values",
+    "No piece of the audit runs on haiku; the auditing model is sonnet or better because auth is risk 2",
+    "Adds an independent verifier for the report, aimed at catching confident false negatives",
+    "Specifies a fixed per-handler return schema (columns such as handler, file:line, auth present, evidence)",
+    "Sizes the repo (counts handlers or route modules) before choosing between fan-out and a single agent",
+    "The fan-out vs single-agent choice is stated with a reason tied to shard size or independence",
+    "The decision is recorded in a machine-readable log with an id (decisions.jsonl contains a decision line)"
+  ]
+}

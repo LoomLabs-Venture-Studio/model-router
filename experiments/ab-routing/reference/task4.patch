@@ -1,0 +1,105 @@
+diff --git a/app/routes/admin.py b/app/routes/admin.py
+index 68833bf..86ef766 100644
+--- a/app/routes/admin.py
++++ b/app/routes/admin.py
+@@ -1,9 +1,11 @@
+-from fastapi import APIRouter, Depends
++from fastapi import APIRouter, Depends, HTTPException
+ from app.core.auth import require_auth, require_admin
+ from app.core.db import query, execute
+ from app.core.users import get_user
+ router = APIRouter()
+ 
++VALID_TIERS = {"free", "pro"}
++
+ @router.get("/admin/users")
+ def all_users(token=Depends(require_auth)):
+     require_admin(token)
+@@ -12,6 +14,8 @@ def all_users(token=Depends(require_auth)):
+ @router.post("/admin/users/{user_id}/tier")
+ def set_tier(user_id: int, tier: str, token=Depends(require_auth)):
+     if not get_user(user_id):
+-        return {"error": "no user"}
++        raise HTTPException(404, "unknown user")
++    if tier not in VALID_TIERS:
++        raise HTTPException(422, "tier must be 'free' or 'pro'")
+     execute("update users set tier = ? where id = ?", (tier, user_id))
+     return {"ok": True}
+diff --git a/app/routes/checkout.py b/app/routes/checkout.py
+index b0a438d..cdd5bae 100644
+--- a/app/routes/checkout.py
++++ b/app/routes/checkout.py
+@@ -1,5 +1,5 @@
+ import time
+-from fastapi import APIRouter, Depends
++from fastapi import APIRouter, Depends, HTTPException
+ from app.core.auth import require_auth
+ from app.core.db import query, execute
+ from app.core.pricing import price_for
+@@ -10,11 +10,17 @@ _inflight = {}
+ @router.post("/checkout")
+ def checkout(user_id: int, token=Depends(require_auth)):
+     u = get_user(user_id)
++    if not u:
++        raise HTTPException(404, "unknown user")
+     items = query("select sku, qty from cart where user_id = ?", (user_id,))
++    if not items:
++        raise HTTPException(409, "cart is empty")
+     total = 0.0
+     for sku, qty in items:
+-        base = query("select price from products where sku = ?", (sku,))[0][0]
+-        total += price_for(user_id, base) * qty
++        rows = query("select price from products where sku = ?", (sku,))
++        if not rows:
++            raise HTTPException(409, "cart has an unknown product")
++        total += price_for(user_id, rows[0][0]) * qty
+     _inflight[user_id] = time.time()
+     execute("insert into payments(user_id, amount) values (?,?)", (user_id, total))
+     execute("delete from cart where user_id = ?", (user_id,))
+diff --git a/app/routes/orders.py b/app/routes/orders.py
+index bd34603..ec459ed 100644
+--- a/app/routes/orders.py
++++ b/app/routes/orders.py
+@@ -1,4 +1,4 @@
+-from fastapi import APIRouter, Depends
++from fastapi import APIRouter, Depends, HTTPException
+ from app.core.auth import require_auth
+ from app.core.db import query, execute
+ from app.core.users import get_user
+@@ -11,7 +11,9 @@ def list_orders(token=Depends(require_auth)):
+ @router.post("/orders")
+ def create_order(user_id: int, sku: str, qty: int, token=Depends(require_auth)):
+     if not get_user(user_id):
+-        return {"error": "no user"}
++        raise HTTPException(404, "unknown user")
++    if qty < 1:
++        raise HTTPException(422, "qty must be at least 1")
+     execute("insert into orders(user_id, sku, qty) values (?,?,?)", (user_id, sku, qty))
+     return {"ok": True}
+ 
+diff --git a/app/routes/users.py b/app/routes/users.py
+index 29f81c8..bbb3e98 100644
+--- a/app/routes/users.py
++++ b/app/routes/users.py
+@@ -1,13 +1,18 @@
+-from fastapi import APIRouter, Depends
++from fastapi import APIRouter, Depends, HTTPException
+ from app.core.auth import require_auth
+ from app.core.users import get_user
+ router = APIRouter()
+ 
+ @router.get("/users/{user_id}")
+ def read_user(user_id: int, token=Depends(require_auth)):
+-    return get_user(user_id)
++    u = get_user(user_id)
++    if not u:
++        raise HTTPException(404, "unknown user")
++    return u
+ 
+ @router.get("/users/{user_id}/public")
+ def read_user_public(user_id: int):
+     u = get_user(user_id)
+-    return {"id": u[0]} if u else None
++    if not u:
++        raise HTTPException(404, "unknown user")
++    return {"id": u[0]}

@@ -1,0 +1,101 @@
+{
+  "expectations": [
+    {
+      "text": "States all seven complexity scores (S, R, A, K, I, P, V) explicitly with values",
+      "passed": false,
+      "evidence": "decision.md contains no complexity-score notation anywhere -- no S/R/A/K/I/P/V letters with numeric values. Reasoning is entirely prose-based (handler counts, read-only status, context-locality, cost/benefit of a stronger or weaker model) with no scoring rubric at all."
+    },
+    {
+      "text": "No piece of the audit runs on haiku; the auditing model is sonnet or better because auth is risk 2",
+      "passed": false,
+      "evidence": "The audit itself runs inline as 'Fable (the session model)'; no explicit tier (sonnet/opus/haiku) is ever assigned to the entity actually doing the audit, so 'sonnet or better' is never established. No risk score of any kind is computed, so there is no 'auth is risk 2' reasoning to tie a model choice to. The only model tier named anywhere in the document is Haiku, proposed (though not dispatched) for a verifier -- the one place a tier is named for auth-adjacent work, it is the cheapest tier, not a sonnet floor."
+    },
+    {
+      "text": "Adds an independent verifier for the report, aimed at catching confident false negatives",
+      "passed": false,
+      "evidence": "Explicitly declined: 'Verifier: no separate verifier agent ... A grep does that job as well as an agent would,' and the dispatch table lists 'Verifier agent | Not dispatched.' A verifier brief is drafted but marked 'NOT dispatched; kept for reference' for a future threshold ('roughly >40 handlers or >8 route files') this run doesn't cross. No independent verifier is actually added."
+    },
+    {
+      "text": "Specifies a fixed per-handler return schema (columns such as handler, file:line, auth present, evidence)",
+      "passed": true,
+      "evidence": "The brief's 'REPORT FORMAT' section specifies a fixed table: 'Severity | Method+Path | File:line | Authn | Authz | Classification | What an attacker can do,' with File:line and Authn (auth-present) as named columns and explicit per-field instructions to cite line numbers for every claim."
+    },
+    {
+      "text": "Sizes the repo (counts handlers or route modules) before choosing between fan-out and a single agent",
+      "passed": true,
+      "evidence": "'the whole route surface is 11 handlers across 6 files (~70 lines of route code) plus a 12-line auth module ... I've already read all of it while scoping' -- sizing is stated and used causally to justify the inline/single-pass decision before it is finalized. (11 handlers / 6 files matches the actual fixture exactly; the '~70 lines' route-code figure is inaccurate, see claims below.)"
+    },
+    {
+      "text": "The fan-out vs single-agent choice is stated with a reason tied to shard size or independence",
+      "passed": true,
+      "evidence": "'Fan-out considered and rejected: partitioning by route file (6 partitions of 5-20 lines each) would produce six readers who each lack core/auth.py context and can't see cross-file patterns; merging six differently-calibrated severity scales is more work than the audit.' Ties the choice directly to both shard size and cross-file independence."
+    },
+    {
+      "text": "The decision is recorded in a machine-readable log with an id (decisions.jsonl contains a decision line)",
+      "passed": false,
+      "evidence": "No decisions.jsonl file exists anywhere under without_skill/outputs (the directory contains only decision.md; the sibling directory contains only timing.json). Nothing machine-readable or id-bearing was logged."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 4,
+    "total": 7,
+    "pass_rate": 0.43
+  },
+  "execution_metrics": {
+    "output_chars": 11106,
+    "transcript_chars": 0,
+    "note": "No transcript file or metrics.json exists for this run; execution_metrics is limited to what can be measured directly from outputs_dir (decision.md character count). No tool-call breakdown is available."
+  },
+  "claims": [
+    {
+      "claim": "The route surface is 11 handlers across 6 files",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Independently confirmed against /home/claude/complexity-workspace/fixture/shopapi: grep '^@router\\.' across app/routes/*.py returns exactly 11 matches across the 6 listed files."
+    },
+    {
+      "claim": "~70 lines of route code",
+      "type": "factual",
+      "verified": false,
+      "evidence": "The six route files actually total 92 lines (13+22+13+17+6+21), not ~70 -- roughly a 24% undercount. Doesn't change the outcome here (single-agent was still the right call), but it's the specific figure the sizing rationale leans on, and the paired with-skill run computed this same figure exactly (92)."
+    },
+    {
+      "claim": "There's no middleware and no router-level or app-level dependencies=[...]; auth exists ONLY where a handler declares it",
+      "type": "factual",
+      "verified": true,
+      "evidence": "grep for 'dependencies=' and 'middleware' under app/ returns zero hits, confirming the claim."
+    },
+    {
+      "claim": "Nothing to gain from a cheaper model; nothing to gain from a stronger one (justifying inline execution on the session model for the audit itself)",
+      "type": "quality",
+      "verified": false,
+      "evidence": "Unverifiable and somewhat self-serving as written: the document never states what tier 'Fable' actually is, so there is no stated baseline to judge 'cheaper' or 'stronger' against, and no explicit floor is set for auth-adjacent work the way a K2-forbids-haiku style policy would set one."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": [],
+    "note": "outputs/user_notes.md does not exist for this run; nothing to summarize."
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "No piece of the audit runs on haiku; the auditing model is sonnet or better because auth is risk 2",
+        "reason": "This run exposes the loophole concretely: because no verifier was dispatched at all, 'no piece runs on haiku' is trivially true, yet there is also no explicit sonnet-or-better commitment for the piece that actually performs the audit ('Fable', tier unstated). The assertion as written can't distinguish 'avoided haiku by using a strong, named model' from 'avoided haiku by not naming any tier and not dispatching anything.' Splitting it into an explicit-floor check and a haiku-absence check would make this discriminate correctly."
+      },
+      {
+        "reason": "No assertion checks that the audit was actually executed and a findings report produced. This run's outputs_dir contains only the routing decision -- no audit report exists. If the intent is to grade a completed audit rather than just a plan for one, the suite needs an assertion that a findings artifact exists and covers all 11 handlers."
+      },
+      {
+        "reason": "The fixture has a deliberate trap -- app/routes/admin.py's set_tier handler sits under /admin and changes a user's tier but never calls require_admin in its body (only the sibling all_users handler does) -- that a real audit and a real verifier would need to catch. This run's mechanical completeness check (grep for require_admin( calls, matched against /admin rows) would plausibly catch this specific gap even without an agent-based verifier, which is a reasonable design. But nothing in the eval actually runs that check or inspects its output, so the eval can't tell a mechanical-check plan that would work from one that wouldn't."
+      },
+      {
+        "assertion": "Sizes the repo (counts handlers or route modules) before choosing between fan-out and a single agent",
+        "reason": "Passed here without the skill, using ordinary scoping rather than any special framework, and the same is true of the fan-out-reasoning assertion. Both look more like general-competence checks than skill-specific discriminators in this pair."
+      }
+    ],
+    "overall": "The assertions that depend on the skill's specific machinery (explicit complexity scores, a genuinely independent dispatched verifier, and a machine-readable decision log) cleanly failed here and cleanly passed in the with-skill counterpart -- good discrimination on those three. The sizing and fan-out-reasoning assertions passed in both runs and add little discriminating signal on their own. The suite has no assertion that the audit was actually completed or that it would catch the fixture's planted gap (admin route missing require_admin), so a well-written routing plan that never gets executed would score identically to one that does; this run's own reasoning is well-argued but the eval can't currently reward that it also happens to lack the specific guardrails (explicit tier floor, dispatched verifier, durable log) the skill is meant to add."
+  }
+}

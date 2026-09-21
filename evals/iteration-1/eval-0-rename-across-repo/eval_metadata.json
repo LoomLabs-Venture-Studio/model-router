@@ -1,0 +1,13 @@
+{
+  "eval_id": 0,
+  "eval_name": "rename-across-repo",
+  "prompt": "rename get_user to fetch_user across the repo",
+  "assertions": [
+    "States all seven complexity scores (S, R, A, K, I, P, V) explicitly with values",
+    "The executing piece is inline or a haiku-tier agent, not sonnet/opus/fable",
+    "Does not fan out to multiple parallel agents",
+    "Names a deterministic acceptance check (zero-hit grep, compile, or tests) rather than a judgment review",
+    "No verifier agent and no human gate are added for this low-risk rename",
+    "The decision is recorded in a machine-readable log with an id (decisions.jsonl contains a decision line)"
+  ]
+}

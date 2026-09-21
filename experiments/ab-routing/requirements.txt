@@ -1,0 +1,6 @@
+# Pinned for the shared shopapi-dev environment (Wave 1B, board-approved 2026-09-19).
+# Exact versions known to install on this machine's Python 3.14; pip resolves the rest.
+# See requirements.lock for the full `pip freeze` of what actually got installed.
+fastapi==0.141.1
+httpx==0.28.1
+pytest==9.1.1

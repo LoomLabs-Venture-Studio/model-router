@@ -1,0 +1,104 @@
+{
+  "run": "with_skill",
+  "eval_id": 1,
+  "eval_name": "intermittent-500s-checkout",
+  "note": "No transcript file was provided for this run; graded entirely from outputs/decision.md and outputs/decisions.jsonl, cross-checked against the actual fixture repo at /home/claude/complexity-workspace/fixture/shopapi.",
+  "expectations": [
+    {
+      "text": "States all seven complexity scores (S, R, A, K, I, P, V) explicitly with values",
+      "passed": true,
+      "evidence": "decision.md:13 'complexity  S2? R3 A2 K2 I1 P0 V2' (Pass 1) and decision.md:38 'complexity  S1 R3 A1 K2 I1 P0 V2' (Pass 2, re-scored) both give all seven letters with numeric values. decisions.jsonl mirrors both exactly: line 1 scores_given {\"S\":2,\"R\":3,\"A\":2,\"K\":2,\"I\":1,\"P\":0,\"V\":2}, line 2 {\"S\":1,\"R\":3,\"A\":1,\"K\":2,\"I\":1,\"P\":0,\"V\":2}."
+    },
+    {
+      "text": "The executing model for the diagnosis/fix is opus or fable (not haiku or sonnet)",
+      "passed": true,
+      "evidence": "decision.md:4 'Session model: Fable 5.1.' The chosen route is 'inline' with the reasoning at decision.md:46 'This session is Fable, above the opus floor, so no implementer agent is needed.' The only mention of haiku is for a size-only, read-only probe (decision.md:13) that was in fact executed inline by the Fable session itself rather than dispatched ('I ran the probe myself instead', decision.md:23) \u2014 no diagnosis or fix work is attributed to haiku or sonnet anywhere."
+    },
+    {
+      "text": "Includes a scoping or diagnosis step before committing to a fix approach",
+      "passed": true,
+      "evidence": "Explicit 'Pass 1: the task as posed' (initial scoring) is followed by a 'Probe result' section (decision.md:23-33) that reads the real repo and records file:line facts, before 'Pass 2: re-scored after the probe' (decision.md:35) commits to the inline-fix route. Verified independently against /home/claude/complexity-workspace/fixture/shopapi: every cited file:line (db.py:2-3, checkout.py:8,12,16,18-21, pricing.py:4, admin.py's missing require_admin call) matches the real source exactly, and the stated repo size ('15 files, 146 lines') is exactly correct (confirmed via wc)."
+    },
+    {
+      "text": "Adds an independent verifier that receives the diff and the task but not the reasoning behind the fix",
+      "passed": true,
+      "evidence": "Step 2 verifier brief (decision.md:139-180): 'Artifact: the uncommitted working-tree changes ... Get them with `git status --short` and `git diff` ... You have not seen how the change was produced; judge it on its own.' It restates the original task and gives only generic architectural context (threadpool model, endpoint location, schema location) \u2014 it never states the claimed root causes or the fix design. The 'Check' list poses open, unanswered questions ('Is every DB access either serialized or per-thread?', 'Are the payment insert and the cart delete committed together or not at all?') rather than asserting what the bug or fix were, so the verifier genuinely has to work it out from the diff."
+    },
+    {
+      "text": "Names a review/merge gate and rules out a direct deploy, acknowledging the payments/data risk",
+      "passed": true,
+      "evidence": "'gate K2: changes ship through review, no direct deploy' appears on both score cards (decision.md:14,39); prose states 'the change goes out through normal PR review, not a direct deploy' (decision.md:50) and the dispatch table lists 'gate | K2 | Changes ship through PR review; I do not commit, push, or deploy' (decision.md:62). K2 is explicitly tied to payments risk: 'K2 (\"checkout writes payments\")' (decision.md:21); the verifier brief separately flags 'The payments table is money-adjacent data' (decision.md:153)."
+    },
+    {
+      "text": "Does not fan the diagnosis out to parallel agents",
+      "passed": true,
+      "evidence": "Explicit: 'No fan-out: the pieces share db.py's interface and are not independent' (decision.md:46), and the dispatch table's 'Not used' row lists 'fan-out (P0)' (decision.md:64). The plan has exactly one probe (executed inline, not even dispatched as an agent), one inline fix, and one sequential verifier agent \u2014 no parallel Agent/Task calls anywhere in the plan."
+    },
+    {
+      "text": "The decision is recorded in a machine-readable log with an id (decisions.jsonl contains a decision line)",
+      "passed": true,
+      "evidence": "outputs/decisions.jsonl exists with two valid JSON lines, each with \"event\": \"decision\" and a unique \"id\" (c-29b430, c-41ce3c) plus full scoring/routing fields. decision.md cross-references the same ids ('id c-29b430', 'id c-41ce3c') and points at the log file, so the human-readable doc and the machine log agree."
+    }
+  ],
+  "summary": {
+    "passed": 7,
+    "failed": 0,
+    "total": 7,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "output_files": [
+      "decision.md",
+      "decisions.jsonl"
+    ],
+    "output_chars": 15782,
+    "transcript_available": false
+  },
+  "claims": [
+    {
+      "claim": "The repo is 15 files across 146 lines",
+      "type": "factual",
+      "verified": true,
+      "evidence": "wc -l against /home/claude/complexity-workspace/fixture/shopapi confirms exactly 15 non-.git files and 146 total lines."
+    },
+    {
+      "claim": "app/core/db.py:3 creates a threading.Lock() ('_lock') that nothing ever acquires",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Read of db.py confirms _lock is created on line 3 and never referenced again inside query() or execute()."
+    },
+    {
+      "claim": "checkout.py's _inflight dict (set at line 18, del'd at line 21, no try/finally) races on concurrent same-user checkouts, and the payment insert (line 19) and cart delete (line 20) are two separate autocommits, not one transaction",
+      "type": "factual",
+      "verified": true,
+      "evidence": "checkout.py lines 8,18-21 match exactly as described; db.py's execute() calls _conn.commit() after every single statement (db.py:9-11), so lines 19 and 20 are indeed two independent autocommits."
+    },
+    {
+      "claim": "get_user is called once at checkout.py:12 (result unused) and again per cart item inside price_for",
+      "type": "factual",
+      "verified": true,
+      "evidence": "pricing.py:4 calls get_user(user_id) inside price_for(), which checkout.py:17 invokes once per item in a for loop; the `u` assigned at checkout.py:12 is never read again before the function returns."
+    },
+    {
+      "claim": "billing.refund and orders.delete_order lack auth, and admin.set_tier never calls require_admin (flagged as out of scope)",
+      "type": "factual",
+      "verified": true,
+      "evidence": "billing.py's refund() and orders.py's delete_order() have no Depends(require_auth) parameter at all; admin.py's set_tier() takes require_auth but never calls require_admin(token), unlike all_users() on the line above which does."
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "States all seven complexity scores (S, R, A, K, I, P, V) explicitly with values",
+        "reason": "As written this only checks presence of seven labelled numbers, not that they are consistent with the chosen route/tier/verifier. A run could print arbitrary scores unrelated to its actual routing choice and still pass. This run happens to be internally consistent (K2/R3 -> opus tier + mandatory verifier, matching its own stated policy, and the jsonl mirrors the prose exactly) but the assertion doesn't test that consistency, only presence."
+      },
+      {
+        "reason": "No assertion checks whether the diagnosis is factually correct against the actual codebase. I independently verified this run's file:line citations (db.py:2-3, checkout.py:8,12,16,18-21, pricing.py:4, admin.py's missing require_admin) against /home/claude/complexity-workspace/fixture/shopapi and every one is accurate, plus the stated repo size (15 files/146 lines) is exact \u2014 but nothing in the assertion list would have caught it if the root cause had been hallucinated or misattributed to the wrong line, since every other checkbox (scores, verifier, gate, log) could still be satisfied by a confidently wrong diagnosis."
+      },
+      {
+        "reason": "There is no transcript for this run, only the final decision document. Process assertions like 'does not fan out' and 'executing model is opus/fable' are graded from what the document claims about itself, not from an actual tool-call log. A run could narrate a clean single-threaded process in prose while a real transcript (if one existed) showed something else. Capturing a tool-call/transcript log alongside decisions.jsonl would let these process assertions be checked against real execution rather than self-report."
+      }
+    ],
+    "overall": "All seven assertions pass with genuine, verifiable substance \u2014 the complexity scores, the probe-then-fix structure, the verifier's blindness to reasoning, and the PR gate are all real and internally consistent with decisions.jsonl, and the diagnosis itself checks out exactly against the fixture repo. The main gaps are structural: no assertion ties the stated scores to the resulting route, none checks diagnostic correctness against ground truth, and without a transcript the process assertions rely on self-report."
+  }
+}

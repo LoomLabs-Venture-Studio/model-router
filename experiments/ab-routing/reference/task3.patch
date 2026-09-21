@@ -1,0 +1,52 @@
+diff --git a/app/core/auth.py b/app/core/auth.py
+index d8a0c51..0a3e923 100644
+--- a/app/core/auth.py
++++ b/app/core/auth.py
+@@ -1,3 +1,5 @@
++import re
++
+ from fastapi import Header, HTTPException
+ 
+ def require_auth(authorization: str = Header(None)):
+@@ -9,3 +11,13 @@ def require_admin(token: str):
+     if token != "admin-token":
+         raise HTTPException(403, "admin only")
+     return token
++
++def identify(token: str) -> tuple[str, int | None]:
++    """Returns ("admin", None) or ("user", id). A token that is neither
++    admin-token nor user-<positive integer> is unauthenticated (401)."""
++    if token == "admin-token":
++        return "admin", None
++    m = re.fullmatch(r"user-(\d+)", token)
++    if not m:
++        raise HTTPException(401, "invalid token")
++    return "user", int(m.group(1))
+diff --git a/app/routes/billing.py b/app/routes/billing.py
+index f4d6b2b..c3936d1 100644
+--- a/app/routes/billing.py
++++ b/app/routes/billing.py
+@@ -1,5 +1,5 @@
+-from fastapi import APIRouter, Depends
+-from app.core.auth import require_auth
++from fastapi import APIRouter, Depends, HTTPException
++from app.core.auth import require_auth, identify
+ from app.core.db import query, execute
+ router = APIRouter()
+ 
+@@ -8,6 +8,14 @@ def billing_history(user_id: int, token=Depends(require_auth)):
+     return query("select * from payments where user_id = ?", (user_id,))
+ 
+ @router.post("/billing/{user_id}/refund")
+-def refund(user_id: int, payment_id: int):
++def refund(user_id: int, payment_id: int, token=Depends(require_auth)):
++    kind, caller_id = identify(token)
++    if kind != "admin" and caller_id != user_id:
++        raise HTTPException(403, "not allowed")
++    rows = query("select refunded from payments where id = ? and user_id = ?", (payment_id, user_id))
++    if not rows:
++        raise HTTPException(404, "unknown payment")
++    if rows[0][0]:
++        raise HTTPException(409, "already refunded")
+     execute("update payments set refunded = 1 where id = ?", (payment_id,))
+     return {"ok": True}

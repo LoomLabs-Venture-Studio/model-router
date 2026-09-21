@@ -1,0 +1,90 @@
+{
+  "expectations": [
+    {
+      "text": "States all seven complexity scores (S, R, A, K, I, P, V) explicitly with values",
+      "passed": false,
+      "evidence": "Full read of without_skill/outputs/decision.md finds no S/R/A/K/I/P/V rubric notation anywhere. The document reasons entirely in prose and a per-file occurrence table ('| File | Occurrences | Kind |'); it never states a complexity card or letter-scored values. Confirmed by `grep -n \"S[0-9].*R[0-9]\"` (the pattern that matches instantly in the with_skill file) returning nothing in this file."
+    },
+    {
+      "text": "The executing piece is inline or a haiku-tier agent, not sonnet/opus/fable",
+      "passed": false,
+      "evidence": "decision.md states execution is '**Doing this inline -- no subagents, no verifier agent, no approval gate.**' and explicitly: '**Assignment:** main session, inline, on the session model (Fable 5.1).' The piece that would actually perform the 15 edits is the session's own model, self-identified as Fable -- one of the three tiers ('sonnet/opus/fable') the assertion names as disallowed. A haiku-tier subagent brief does exist in section 2b, but it is explicitly marked 'NOT sent (contingency)', so it does not change what the run actually designates as the executor. See eval_feedback for the genuine ambiguity in this assertion's wording; this verdict follows the reading most consistent with the skill's own text (references/routing-policy.md: '\"Inline\" assumes the session model is at least the tier') and with the skill's worked example for this identical task, which routes to a single haiku agent rather than inline."
+    },
+    {
+      "text": "Does not fan out to multiple parallel agents",
+      "passed": true,
+      "evidence": "'**Doing this inline -- no subagents, no verifier agent, no approval gate.**' Only one execution path (inline) is actually used; the alternative haiku brief in section 2b is explicitly not dispatched, so at most one piece ever executes -- no fan-out."
+    },
+    {
+      "text": "Names a deterministic acceptance check (zero-hit grep, compile, or tests) rather than a judgment review",
+      "passed": true,
+      "evidence": "'Step 2 -- Verify (all deterministic; every one must pass)' lists: (a) zero-hit `grep -rn get_user`, (b) 15-line `grep -rn fetch_user`, (c) `python3 -m compileall -q` exit 0, (d) an import smoke test, (e) `git diff --stat` == 7 files. All deterministic pass/fail checks, not a model-judgment review."
+    },
+    {
+      "text": "No verifier agent and no human gate are added for this low-risk rename",
+      "passed": true,
+      "evidence": "'Doing this inline -- no subagents, no verifier agent, no approval gate.' and '**Separate verifier:** none. **Human gate before execution:** none; the user reviews the diff after.'"
+    },
+    {
+      "text": "The decision is recorded in a machine-readable log with an id (decisions.jsonl contains a decision line)",
+      "passed": false,
+      "evidence": "without_skill/outputs/ contains only decision.md; no decisions.jsonl file exists anywhere under without_skill/ (confirmed via directory listing and a recursive `find`). No id is assigned and no machine-readable log entry is produced -- the decision exists only as prose in a markdown file."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 3,
+    "total": 6,
+    "pass_rate": 0.5
+  },
+  "execution_metrics": {
+    "output_chars": 7233,
+    "transcript_chars": null,
+    "note": "No transcript file exists for this eval (grading is based on outputs_dir per the task instructions); no metrics.json was produced by the executor. output_chars = decision.md (7233B); this run produced no decisions.jsonl."
+  },
+  "claims": [
+    {
+      "claim": "get_user has 15 pre-verified occurrences across the same 7 files (app/core/users.py, app/core/pricing.py, app/routes/users.py, app/routes/orders.py, app/routes/admin.py, app/routes/checkout.py, tests/test_users.py)",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Independently re-ran `grep -rn get_user --include=*.py .` against the live fixture at /home/claude/complexity-workspace/fixture/shopapi: exactly 15 matching lines across exactly those 7 files, matching the per-file occurrence table in the decision."
+    },
+    {
+      "claim": "Repository is 146 lines total",
+      "type": "factual",
+      "verified": true,
+      "evidence": "`find . -type f -not -path './.git/*' \\( -name '*.py' -o -name '*.md' -o -name '*.sql' \\) -exec wc -l {} +` on the fixture totals exactly 146 lines -- an exact match."
+    },
+    {
+      "claim": "Git working tree is clean at commit c4c1184",
+      "type": "factual",
+      "verified": true,
+      "evidence": "`git log --oneline` on the fixture shows a single commit `c4c1184 fixture`, and `git status --short` is empty (clean tree)."
+    },
+    {
+      "claim": "pytest and fastapi aren't installed in this environment and shop.db has no schema",
+      "type": "process",
+      "verified": true,
+      "evidence": "Confirmed pytest and fastapi both raise ModuleNotFoundError on import, and no conftest.py/pytest.ini/pyproject.toml exists in the fixture to apply migrations/001_init.sql, so shop.db would indeed have no `users` table when the suite runs."
+    },
+    {
+      "claim": "Execution: inline, in this session (Fable 5.1) -- no subagents",
+      "type": "process",
+      "verified": true,
+      "evidence": "Directly self-reported in decision.md ('Assignment: main session, inline, on the session model (Fable 5.1)'). This is also the basis for the assertion-2 failure above: the mechanical edits would be performed by the session's own Fable-tier model rather than delegated to haiku, unlike the with_skill run for the same task."
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "The executing piece is inline or a haiku-tier agent, not sonnet/opus/fable",
+        "reason": "This assertion is ambiguous in a fixture where the acting session always self-identifies as a top-tier model ('Fable'). If 'inline' is read as an unconditional pass regardless of which model does the work, this run passes trivially -- simply by defaulting to 'I'll just do it myself,' the behavior an unguided agent falls into by default -- which would make the assertion unable to ever catch the exact failure mode (an expensive model doing 15 mechanical edits itself) that the companion with_skill run for this identical task was specifically designed to avoid (its brief explicitly says 'do not inherit the session model'). Recommend tightening the wording so 'inline' cannot be satisfied by a stated large-model session doing the work directly, e.g. 'the model tier performing the edits -- inline or delegated -- is haiku or smaller.'"
+      },
+      {
+        "assertion": "States all seven complexity scores (S, R, A, K, I, P, V) explicitly with values",
+        "reason": "Worth confirming the eval intends a hard requirement here rather than a soft one: this run reasons carefully and arrives at conclusions that map cleanly onto the rubric (e.g. its table is effectively an S-dimension scoping exercise, and its 'no verifier, no gate' reasoning is effectively K/V reasoning) but never renders them as the S/R/A/K/I/P/V notation, so it fails outright rather than partially. That is arguably the correct strict reading (the point of the skill is the shared notation itself, not just good judgment), but it is worth the eval author double-checking that intent, since 'good reasoning, wrong notation' and 'no reasoning at all' both fail identically under the current wording."
+      }
+    ],
+    "overall": "This run fails half the assertions, and the two failures are substantive rather than technicalities: no complexity scores are ever stated (the rubric this eval exists to test is simply absent), and no decisions.jsonl is produced at all, so there is no machine-readable record to close a feedback loop on. The one genuinely debatable call is assertion 2 (inline-on-the-session's-own-top-tier-model) -- see the suggestion above; I graded it as a fail because the run's own words identify the executor as 'Fable,' one of the tiers the assertion names as disallowed, and because the skill's own routing policy treats 'inline' as inheriting the session's tier rather than as an exemption from it."
+  }
+}

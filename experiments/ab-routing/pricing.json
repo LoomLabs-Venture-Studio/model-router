@@ -1,0 +1,21 @@
+{
+  "anthropic": {
+    "source_url": "https://platform.claude.com/docs/en/about-claude/pricing",
+    "retrieved": "2026-09-19",
+    "notes": "USD per million tokens, from the 'Model pricing' table. cache_write_5m and cache_write_1h are the page's separate 5-minute and 1-hour prompt-cache write rates (2x vs 1.25x base input, except Fable/Mythos 5.1's cache_read at 0.025x base input rather than the standard 0.1x). Keys are prefixes: account.py matches the longest configured prefix, so a dated/variant model id (e.g. claude-haiku-4-5-20251001) still resolves against 'claude-haiku-4-5'. Only global inference_geo, standard speed, and non-batch service_tier are priced here -- see account.py's guard rails for the rest.",
+    "prices": {
+      "claude-haiku-4-5": {"input": 1, "output": 5, "cache_write_5m": 1.25, "cache_write_1h": 2, "cache_read": 0.10},
+      "claude-sonnet-5": {"input": 2, "output": 10, "cache_write_5m": 2.50, "cache_write_1h": 4, "cache_read": 0.20},
+      "claude-opus-5": {"input": 5, "output": 25, "cache_write_5m": 6.25, "cache_write_1h": 10, "cache_read": 0.50},
+      "claude-fable-5-1": {"input": 10, "output": 50, "cache_write_5m": 12.50, "cache_write_1h": 20, "cache_read": 0.25}
+    }
+  },
+  "typesafe": {
+    "source_url": "https://typesafe.ai",
+    "retrieved": "2026-09-19",
+    "notes": "TypeSafe has no dedicated pricing page as of the retrieval date. The homepage states input cost as '$42 per billion input tokens' ($0.042/MTok), and https://docs.typesafe.ai/models confirms 'Output tokens are free.' Neither page publishes cache pricing (Jev is a stateless per-call decision API; no documented prompt caching), so cache_write_5m/cache_write_1h/cache_read are left null rather than guessed.",
+    "prices": {
+      "jev-latest": {"input": 0.042, "output": 0, "cache_write_5m": null, "cache_write_1h": null, "cache_read": null}
+    }
+  }
+}

@@ -1,0 +1,33 @@
+diff --git a/tests/conftest.py b/tests/conftest.py
+new file mode 100644
+index 0000000..218d3e5
+--- /dev/null
++++ b/tests/conftest.py
+@@ -0,0 +1,27 @@
++"""Gives every test in this suite its own temporary, migrated database,
++automatically -- no test needs to request a fixture by name to get one.
++
++app.core.db's query()/execute() look up the module-level name `_conn` in
++app.core.db's own namespace at call time, so pointing that name at a fresh
++sqlite3 connection (via monkeypatch, restored after each test) redirects them
++without touching app/ itself or changing its default behavior outside tests.
++"""
++import sqlite3
++from pathlib import Path
++
++import pytest
++
++import app.core.db as db
++
++MIGRATION_SQL = (Path(__file__).resolve().parent.parent / "migrations" / "001_init.sql").read_text(
++    encoding="utf-8")
++
++
++@pytest.fixture(autouse=True)
++def _isolated_db(monkeypatch, tmp_path):
++    conn = sqlite3.connect(str(tmp_path / "test_shop.db"), check_same_thread=False)
++    conn.executescript(MIGRATION_SQL)
++    conn.commit()
++    monkeypatch.setattr(db, "_conn", conn)
++    yield
++    conn.close()

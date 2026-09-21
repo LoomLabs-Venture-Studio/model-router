@@ -1,0 +1,148 @@
+diff --git a/app/core/auth.py b/app/core/auth.py
+index d8a0c51..0006184 100644
+--- a/app/core/auth.py
++++ b/app/core/auth.py
+@@ -1,11 +1,35 @@
++import re
++
+ from fastapi import Header, HTTPException
+ 
+-def require_auth(authorization: str = Header(None)):
++
++def require_auth(authorization: str = Header(None)) -> str:
+     if not authorization or not authorization.startswith("Bearer "):
+         raise HTTPException(401, "missing token")
+     return authorization.split(" ", 1)[1]
+ 
+-def require_admin(token: str):
+-    if token != "admin-token":
++
++def identify(token: str) -> tuple[str, int | None]:
++    """Returns ("admin", None) or ("user", id). A token that is neither
++    admin-token nor user-<positive integer> is unauthenticated (401), not
++    merely unauthorized -- this applies everywhere, including admin routes."""
++    if token == "admin-token":
++        return "admin", None
++    m = re.fullmatch(r"user-(\d+)", token)
++    if not m:
++        raise HTTPException(401, "invalid token")
++    return "user", int(m.group(1))
++
++
++def require_admin(token: str) -> None:
++    kind, _ = identify(token)
++    if kind != "admin":
+         raise HTTPException(403, "admin only")
+-    return token
++
++
++def require_owner_or_admin(token: str, owner_id: int) -> None:
++    kind, caller_id = identify(token)
++    if kind == "admin":
++        return
++    if caller_id != owner_id:
++        raise HTTPException(403, "not allowed")
+diff --git a/app/routes/admin.py b/app/routes/admin.py
+index 68833bf..bb30f2c 100644
+--- a/app/routes/admin.py
++++ b/app/routes/admin.py
+@@ -11,6 +11,7 @@ def all_users(token=Depends(require_auth)):
+ 
+ @router.post("/admin/users/{user_id}/tier")
+ def set_tier(user_id: int, tier: str, token=Depends(require_auth)):
++    require_admin(token)
+     if not get_user(user_id):
+         return {"error": "no user"}
+     execute("update users set tier = ? where id = ?", (tier, user_id))
+diff --git a/app/routes/billing.py b/app/routes/billing.py
+index f4d6b2b..5a76814 100644
+--- a/app/routes/billing.py
++++ b/app/routes/billing.py
+@@ -1,10 +1,11 @@
+ from fastapi import APIRouter, Depends
+-from app.core.auth import require_auth
++from app.core.auth import require_auth, require_owner_or_admin
+ from app.core.db import query, execute
+ router = APIRouter()
+ 
+ @router.get("/billing/{user_id}")
+ def billing_history(user_id: int, token=Depends(require_auth)):
++    require_owner_or_admin(token, user_id)
+     return query("select * from payments where user_id = ?", (user_id,))
+ 
+ @router.post("/billing/{user_id}/refund")
+diff --git a/app/routes/checkout.py b/app/routes/checkout.py
+index b0a438d..c7bb554 100644
+--- a/app/routes/checkout.py
++++ b/app/routes/checkout.py
+@@ -1,6 +1,6 @@
+ import time
+ from fastapi import APIRouter, Depends
+-from app.core.auth import require_auth
++from app.core.auth import require_auth, require_owner_or_admin
+ from app.core.db import query, execute
+ from app.core.pricing import price_for
+ from app.core.users import get_user
+@@ -9,6 +9,7 @@ _inflight = {}
+ 
+ @router.post("/checkout")
+ def checkout(user_id: int, token=Depends(require_auth)):
++    require_owner_or_admin(token, user_id)
+     u = get_user(user_id)
+     items = query("select sku, qty from cart where user_id = ?", (user_id,))
+     total = 0.0
+diff --git a/app/routes/orders.py b/app/routes/orders.py
+index bd34603..a5eb6fa 100644
+--- a/app/routes/orders.py
++++ b/app/routes/orders.py
+@@ -1,21 +1,29 @@
+-from fastapi import APIRouter, Depends
+-from app.core.auth import require_auth
++from fastapi import APIRouter, Depends, HTTPException
++from app.core.auth import require_auth, require_owner_or_admin, identify
+ from app.core.db import query, execute
+ from app.core.users import get_user
+ router = APIRouter()
+ 
+ @router.get("/orders")
+ def list_orders(token=Depends(require_auth)):
+-    return query("select * from orders")
++    kind, caller_id = identify(token)
++    if kind == "admin":
++        return query("select * from orders")
++    return query("select * from orders where user_id = ?", (caller_id,))
+ 
+ @router.post("/orders")
+ def create_order(user_id: int, sku: str, qty: int, token=Depends(require_auth)):
++    require_owner_or_admin(token, user_id)
+     if not get_user(user_id):
+         return {"error": "no user"}
+     execute("insert into orders(user_id, sku, qty) values (?,?,?)", (user_id, sku, qty))
+     return {"ok": True}
+ 
+ @router.delete("/orders/{order_id}")
+-def delete_order(order_id: int):
++def delete_order(order_id: int, token=Depends(require_auth)):
++    rows = query("select user_id from orders where id = ?", (order_id,))
++    if not rows:
++        raise HTTPException(404, "unknown order")
++    require_owner_or_admin(token, rows[0][0])
+     execute("delete from orders where id = ?", (order_id,))
+     return {"ok": True}
+diff --git a/app/routes/users.py b/app/routes/users.py
+index 29f81c8..66231bc 100644
+--- a/app/routes/users.py
++++ b/app/routes/users.py
+@@ -1,10 +1,11 @@
+ from fastapi import APIRouter, Depends
+-from app.core.auth import require_auth
++from app.core.auth import require_auth, require_owner_or_admin
+ from app.core.users import get_user
+ router = APIRouter()
+ 
+ @router.get("/users/{user_id}")
+ def read_user(user_id: int, token=Depends(require_auth)):
++    require_owner_or_admin(token, user_id)
+     return get_user(user_id)
+ 
+ @router.get("/users/{user_id}/public")

@@ -1,0 +1,849 @@
+{
+  "run": "r1",
+  "pricing_source": {
+    "anthropic": {
+      "source_url": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "retrieved": "2026-09-19"
+    },
+    "typesafe": {
+      "source_url": "https://typesafe.ai",
+      "retrieved": "2026-09-19"
+    }
+  },
+  "line_items": [
+    {
+      "arm": "A",
+      "task": 1,
+      "role": "engineer",
+      "model": "claude-sonnet-5",
+      "price_row": {
+        "provider": "anthropic",
+        "prefix": "claude-sonnet-5"
+      },
+      "tokens": {
+        "input_tokens": 64,
+        "output_tokens": 11061,
+        "cache_creation_input_tokens": 73507,
+        "cache_read_input_tokens": 1977986
+      },
+      "usd": 0.6901027000000001,
+      "breakdown": {
+        "input_tokens": {
+          "tokens": 64,
+          "price_per_mtok": 2,
+          "usd": 0.00012800000000000002
+        },
+        "output_tokens": {
+          "tokens": 11061,
+          "price_per_mtok": 10,
+          "usd": 0.11061000000000001
+        },
+        "cache_write_5m_tokens": {
+          "tokens": 73507,
+          "price_per_mtok": 2.5,
+          "usd": 0.18376749999999997
+        },
+        "cache_read_input_tokens": {
+          "tokens": 1977986,
+          "price_per_mtok": 0.2,
+          "usd": 0.39559720000000004
+        }
+      },
+      "transcript": "/home/user/.claude/projects/-home-user-projects-example/bdbc4082-930a-47aa-9b18-0493292bb70e/subagents/agent-aabA-t1-1fc7f5df5817c4d2.jsonl"
+    },
+    {
+      "arm": "A",
+      "task": 2,
+      "role": "engineer",
+      "model": "claude-sonnet-5",
+      "price_row": {
+        "provider": "anthropic",
+        "prefix": "claude-sonnet-5"
+      },
+      "tokens": {
+        "input_tokens": 44,
+        "output_tokens": 23006,
+        "cache_creation_input_tokens": 63090,
+        "cache_read_input_tokens": 1573639
+      },
+      "usd": 0.7026008000000001,
+      "breakdown": {
+        "input_tokens": {
+          "tokens": 44,
+          "price_per_mtok": 2,
+          "usd": 8.800000000000002e-05
+        },
+        "output_tokens": {
+          "tokens": 23006,
+          "price_per_mtok": 10,
+          "usd": 0.23006
+        },
+        "cache_read_input_tokens": {
+          "tokens": 1573639,
+          "price_per_mtok": 0.2,
+          "usd": 0.31472779999999995
+        },
+        "cache_write_5m_tokens": {
+          "tokens": 63090,
+          "price_per_mtok": 2.5,
+          "usd": 0.157725
+        }
+      },
+      "transcript": "/home/user/.claude/projects/-home-user-projects-example/bdbc4082-930a-47aa-9b18-0493292bb70e/subagents/agent-aabA-t2-14aed7230dd6a7ab.jsonl"
+    },
+    {
+      "arm": "A",
+      "task": 2,
+      "role": "probe",
+      "model": "claude-haiku-4-5-20251001",
+      "price_row": {
+        "provider": "anthropic",
+        "prefix": "claude-haiku-4-5"
+      },
+      "tokens": {
+        "input_tokens": 106,
+        "output_tokens": 2791,
+        "cache_creation_input_tokens": 25412,
+        "cache_read_input_tokens": 481011
+      },
+      "usd": 0.09392709999999999,
+      "breakdown": {
+        "input_tokens": {
+          "tokens": 106,
+          "price_per_mtok": 1,
+          "usd": 0.00010600000000000002
+        },
+        "output_tokens": {
+          "tokens": 2791,
+          "price_per_mtok": 5,
+          "usd": 0.013955000000000002
+        },
+        "cache_read_input_tokens": {
+          "tokens": 481011,
+          "price_per_mtok": 0.1,
+          "usd": 0.0481011
+        },
+        "cache_write_5m_tokens": {
+          "tokens": 25412,
+          "price_per_mtok": 1.25,
+          "usd": 0.031765
+        }
+      },
+      "transcript": "/home/user/.claude/projects/-home-user-projects-example/bdbc4082-930a-47aa-9b18-0493292bb70e/subagents/agent-aabA-t2-probe-e39d6df5b00ece32.jsonl"
+    },
+    {
+      "arm": "A",
+      "task": 3,
+      "role": "engineer",
+      "model": "claude-opus-5",
+      "price_row": {
+        "provider": "anthropic",
+        "prefix": "claude-opus-5"
+      },
+      "tokens": {
+        "input_tokens": 32,
+        "output_tokens": 14598,
+        "cache_creation_input_tokens": 72313,
+        "cache_read_input_tokens": 918458
+      },
+      "usd": 1.2762952499999998,
+      "breakdown": {
+        "input_tokens": {
+          "tokens": 32,
+          "price_per_mtok": 5,
+          "usd": 0.00016
+        },
+        "output_tokens": {
+          "tokens": 14598,
+          "price_per_mtok": 25,
+          "usd": 0.36494999999999994
+        },
+        "cache_write_5m_tokens": {
+          "tokens": 72313,
+          "price_per_mtok": 6.25,
+          "usd": 0.45195625000000006
+        },
+        "cache_read_input_tokens": {
+          "tokens": 918458,
+          "price_per_mtok": 0.5,
+          "usd": 0.45922899999999994
+        }
+      },
+      "transcript": "/home/user/.claude/projects/-home-user-projects-example/bdbc4082-930a-47aa-9b18-0493292bb70e/subagents/agent-aabA-t3-678790f55a945796.jsonl"
+    },
+    {
+      "arm": "A",
+      "task": 3,
+      "role": "probe",
+      "model": "claude-haiku-4-5-20251001",
+      "price_row": {
+        "provider": "anthropic",
+        "prefix": "claude-haiku-4-5"
+      },
+      "tokens": {
+        "input_tokens": 90,
+        "output_tokens": 2079,
+        "cache_creation_input_tokens": 21472,
+        "cache_read_input_tokens": 399665
+      },
+      "usd": 0.07729149999999999,
+      "breakdown": {
+        "input_tokens": {
+          "tokens": 90,
+          "price_per_mtok": 1,
+          "usd": 9e-05
+        },
+        "output_tokens": {
+          "tokens": 2079,
+          "price_per_mtok": 5,
+          "usd": 0.010395000000000001
+        },
+        "cache_read_input_tokens": {
+          "tokens": 399665,
+          "price_per_mtok": 0.1,
+          "usd": 0.0399665
+        },
+        "cache_write_5m_tokens": {
+          "tokens": 21472,
+          "price_per_mtok": 1.25,
+          "usd": 0.02684
+        }
+      },
+      "transcript": "/home/user/.claude/projects/-home-user-projects-example/bdbc4082-930a-47aa-9b18-0493292bb70e/subagents/agent-aabA-t3-probe-55a9c9ffd6db7ebb.jsonl"
+    },
+    {
+      "arm": "A",
+      "task": 4,
+      "role": "engineer",
+      "model": "claude-sonnet-5",
+      "price_row": {
+        "provider": "anthropic",
+        "prefix": "claude-sonnet-5"
+      },
+      "tokens": {
+        "input_tokens": 52,
+        "output_tokens": 11576,
+        "cache_creation_input_tokens": 77012,
+        "cache_read_input_tokens": 1624170
+      },
+      "usd": 0.6332279999999999,
+      "breakdown": {
+        "input_tokens": {
+          "tokens": 52,
+          "price_per_mtok": 2,
+          "usd": 0.00010400000000000003
+        },
+        "output_tokens": {
+          "tokens": 11576,
+          "price_per_mtok": 10,
+          "usd": 0.11575999999999997
+        },
+        "cache_write_5m_tokens": {
+          "tokens": 77012,
+          "price_per_mtok": 2.5,
+          "usd": 0.19252999999999995
+        },
+        "cache_read_input_tokens": {
+          "tokens": 1624170,
+          "price_per_mtok": 0.2,
+          "usd": 0.32483399999999996
+        }
+      },
+      "transcript": "/home/user/.claude/projects/-home-user-projects-example/bdbc4082-930a-47aa-9b18-0493292bb70e/subagents/agent-aabA-t4-da78a3288e67fb6a.jsonl"
+    },
+    {
+      "arm": "B",
+      "task": 1,
+      "role": "engineer",
+      "model": "claude-fable-5-1",
+      "price_row": {
+        "provider": "anthropic",
+        "prefix": "claude-fable-5-1"
+      },
+      "tokens": {
+        "input_tokens": 34,
+        "output_tokens": 20067,
+        "cache_creation_input_tokens": 80421,
+        "cache_read_input_tokens": 1007051
+      },
+      "usd": 2.26071525,
+      "breakdown": {
+        "input_tokens": {
+          "tokens": 34,
+          "price_per_mtok": 10,
+          "usd": 0.00034
+        },
+        "output_tokens": {
+          "tokens": 20067,
+          "price_per_mtok": 50,
+          "usd": 1.00335
+        },
+        "cache_write_5m_tokens": {
+          "tokens": 80421,
+          "price_per_mtok": 12.5,
+          "usd": 1.0052625
+        },
+        "cache_read_input_tokens": {
+          "tokens": 1007051,
+          "price_per_mtok": 0.25,
+          "usd": 0.25176275
+        }
+      },
+      "transcript": "/home/user/.claude/projects/-home-user-projects-example/bdbc4082-930a-47aa-9b18-0493292bb70e/subagents/agent-aabB-t1-94c18f4e2ef411b8.jsonl"
+    },
+    {
+      "arm": "B",
+      "task": 2,
+      "role": "engineer",
+      "model": "claude-fable-5-1",
+      "price_row": {
+        "provider": "anthropic",
+        "prefix": "claude-fable-5-1"
+      },
+      "tokens": {
+        "input_tokens": 34,
+        "output_tokens": 33042,
+        "cache_creation_input_tokens": 96182,
+        "cache_read_input_tokens": 1128253
+      },
+      "usd": 3.1367782500000003,
+      "breakdown": {
+        "input_tokens": {
+          "tokens": 34,
+          "price_per_mtok": 10,
+          "usd": 0.00034
+        },
+        "output_tokens": {
+          "tokens": 33042,
+          "price_per_mtok": 50,
+          "usd": 1.6521000000000001
+        },
+        "cache_write_5m_tokens": {
+          "tokens": 96182,
+          "price_per_mtok": 12.5,
+          "usd": 1.2022750000000002
+        },
+        "cache_read_input_tokens": {
+          "tokens": 1128253,
+          "price_per_mtok": 0.25,
+          "usd": 0.28206325000000004
+        }
+      },
+      "transcript": "/home/user/.claude/projects/-home-user-projects-example/bdbc4082-930a-47aa-9b18-0493292bb70e/subagents/agent-aabB-t2-48ec8187f25a2aa1.jsonl"
+    },
+    {
+      "arm": "B",
+      "task": 3,
+      "role": "engineer",
+      "model": "claude-fable-5-1",
+      "price_row": {
+        "provider": "anthropic",
+        "prefix": "claude-fable-5-1"
+      },
+      "tokens": {
+        "input_tokens": 42,
+        "output_tokens": 23952,
+        "cache_creation_input_tokens": 67112,
+        "cache_read_input_tokens": 1341327
+      },
+      "usd": 2.3722517499999998,
+      "breakdown": {
+        "input_tokens": {
+          "tokens": 42,
+          "price_per_mtok": 10,
+          "usd": 0.00042
+        },
+        "output_tokens": {
+          "tokens": 23952,
+          "price_per_mtok": 50,
+          "usd": 1.1976
+        },
+        "cache_read_input_tokens": {
+          "tokens": 1341327,
+          "price_per_mtok": 0.25,
+          "usd": 0.33533175000000004
+        },
+        "cache_write_5m_tokens": {
+          "tokens": 67112,
+          "price_per_mtok": 12.5,
+          "usd": 0.8388999999999999
+        }
+      },
+      "transcript": "/home/user/.claude/projects/-home-user-projects-example/bdbc4082-930a-47aa-9b18-0493292bb70e/subagents/agent-aabB-t3-ddedad98e642ce8e.jsonl"
+    },
+    {
+      "arm": "B",
+      "task": 4,
+      "role": "engineer",
+      "model": "claude-fable-5-1",
+      "price_row": {
+        "provider": "anthropic",
+        "prefix": "claude-fable-5-1"
+      },
+      "tokens": {
+        "input_tokens": 24,
+        "output_tokens": 9351,
+        "cache_creation_input_tokens": 55603,
+        "cache_read_input_tokens": 642830
+      },
+      "usd": 1.323535,
+      "breakdown": {
+        "input_tokens": {
+          "tokens": 24,
+          "price_per_mtok": 10,
+          "usd": 0.00024
+        },
+        "output_tokens": {
+          "tokens": 9351,
+          "price_per_mtok": 50,
+          "usd": 0.46754999999999997
+        },
+        "cache_read_input_tokens": {
+          "tokens": 642830,
+          "price_per_mtok": 0.25,
+          "usd": 0.16070749999999998
+        },
+        "cache_write_5m_tokens": {
+          "tokens": 55603,
+          "price_per_mtok": 12.5,
+          "usd": 0.6950375000000001
+        }
+      },
+      "transcript": "/home/user/.claude/projects/-home-user-projects-example/bdbc4082-930a-47aa-9b18-0493292bb70e/subagents/agent-aabB-t4-b49bfcdaccfe689c.jsonl"
+    },
+    {
+      "arm": "A",
+      "task": 1,
+      "role": "router",
+      "model": "jev-latest",
+      "price_row": {
+        "provider": "typesafe",
+        "prefix": "jev-latest"
+      },
+      "tokens": {
+        "input_tokens": 1759,
+        "output_tokens": 144,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0
+      },
+      "usd": 7.3878e-05,
+      "breakdown": {
+        "input_tokens": {
+          "tokens": 1759,
+          "price_per_mtok": 0.042,
+          "usd": 7.3878e-05
+        },
+        "output_tokens": {
+          "tokens": 144,
+          "price_per_mtok": 0,
+          "usd": 0.0
+        }
+      },
+      "call_type": "initial",
+      "decision_id": "c-85de41"
+    },
+    {
+      "arm": "A",
+      "task": 2,
+      "role": "router",
+      "model": "jev-latest",
+      "price_row": {
+        "provider": "typesafe",
+        "prefix": "jev-latest"
+      },
+      "tokens": {
+        "input_tokens": 1980,
+        "output_tokens": 144,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0
+      },
+      "usd": 8.316000000000001e-05,
+      "breakdown": {
+        "input_tokens": {
+          "tokens": 1980,
+          "price_per_mtok": 0.042,
+          "usd": 8.316000000000001e-05
+        },
+        "output_tokens": {
+          "tokens": 144,
+          "price_per_mtok": 0,
+          "usd": 0.0
+        }
+      },
+      "call_type": "initial",
+      "decision_id": "c-cfe318"
+    },
+    {
+      "arm": "A",
+      "task": 3,
+      "role": "router",
+      "model": "jev-latest",
+      "price_row": {
+        "provider": "typesafe",
+        "prefix": "jev-latest"
+      },
+      "tokens": {
+        "input_tokens": 1791,
+        "output_tokens": 144,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0
+      },
+      "usd": 7.5222e-05,
+      "breakdown": {
+        "input_tokens": {
+          "tokens": 1791,
+          "price_per_mtok": 0.042,
+          "usd": 7.5222e-05
+        },
+        "output_tokens": {
+          "tokens": 144,
+          "price_per_mtok": 0,
+          "usd": 0.0
+        }
+      },
+      "call_type": "initial",
+      "decision_id": "c-060d9c"
+    },
+    {
+      "arm": "A",
+      "task": 4,
+      "role": "router",
+      "model": "jev-latest",
+      "price_row": {
+        "provider": "typesafe",
+        "prefix": "jev-latest"
+      },
+      "tokens": {
+        "input_tokens": 1905,
+        "output_tokens": 144,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0
+      },
+      "usd": 8.001e-05,
+      "breakdown": {
+        "input_tokens": {
+          "tokens": 1905,
+          "price_per_mtok": 0.042,
+          "usd": 8.001e-05
+        },
+        "output_tokens": {
+          "tokens": 144,
+          "price_per_mtok": 0,
+          "usd": 0.0
+        }
+      },
+      "call_type": "initial",
+      "decision_id": "c-2f44d9"
+    },
+    {
+      "arm": "A",
+      "task": 3,
+      "role": "router",
+      "model": "jev-latest",
+      "price_row": {
+        "provider": "typesafe",
+        "prefix": "jev-latest"
+      },
+      "tokens": {
+        "input_tokens": 1951,
+        "output_tokens": 144,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0
+      },
+      "usd": 8.194200000000001e-05,
+      "breakdown": {
+        "input_tokens": {
+          "tokens": 1951,
+          "price_per_mtok": 0.042,
+          "usd": 8.194200000000001e-05
+        },
+        "output_tokens": {
+          "tokens": 144,
+          "price_per_mtok": 0,
+          "usd": 0.0
+        }
+      },
+      "call_type": "after_probe",
+      "decision_id": "c-313b57"
+    },
+    {
+      "arm": "A",
+      "task": 2,
+      "role": "router",
+      "model": "jev-latest",
+      "price_row": {
+        "provider": "typesafe",
+        "prefix": "jev-latest"
+      },
+      "tokens": {
+        "input_tokens": 2350,
+        "output_tokens": 144,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0
+      },
+      "usd": 9.87e-05,
+      "breakdown": {
+        "input_tokens": {
+          "tokens": 2350,
+          "price_per_mtok": 0.042,
+          "usd": 9.87e-05
+        },
+        "output_tokens": {
+          "tokens": 144,
+          "price_per_mtok": 0,
+          "usd": 0.0
+        }
+      },
+      "call_type": "after_probe",
+      "decision_id": "c-bfda87"
+    }
+  ],
+  "per_task": {
+    "1": {
+      "A": {
+        "tokens": {
+          "input_tokens": 1823,
+          "output_tokens": 11205,
+          "cache_creation_input_tokens": 73507,
+          "cache_read_input_tokens": 1977986
+        },
+        "usd": 0.6901765780000001
+      },
+      "B": {
+        "tokens": {
+          "input_tokens": 34,
+          "output_tokens": 20067,
+          "cache_creation_input_tokens": 80421,
+          "cache_read_input_tokens": 1007051
+        },
+        "usd": 2.26071525
+      }
+    },
+    "2": {
+      "A": {
+        "tokens": {
+          "input_tokens": 4480,
+          "output_tokens": 26085,
+          "cache_creation_input_tokens": 88502,
+          "cache_read_input_tokens": 2054650
+        },
+        "usd": 0.79670976
+      },
+      "B": {
+        "tokens": {
+          "input_tokens": 34,
+          "output_tokens": 33042,
+          "cache_creation_input_tokens": 96182,
+          "cache_read_input_tokens": 1128253
+        },
+        "usd": 3.1367782500000003
+      }
+    },
+    "3": {
+      "A": {
+        "tokens": {
+          "input_tokens": 3864,
+          "output_tokens": 16965,
+          "cache_creation_input_tokens": 93785,
+          "cache_read_input_tokens": 1318123
+        },
+        "usd": 1.3537439139999998
+      },
+      "B": {
+        "tokens": {
+          "input_tokens": 42,
+          "output_tokens": 23952,
+          "cache_creation_input_tokens": 67112,
+          "cache_read_input_tokens": 1341327
+        },
+        "usd": 2.3722517499999998
+      }
+    },
+    "4": {
+      "A": {
+        "tokens": {
+          "input_tokens": 1957,
+          "output_tokens": 11720,
+          "cache_creation_input_tokens": 77012,
+          "cache_read_input_tokens": 1624170
+        },
+        "usd": 0.6333080099999999
+      },
+      "B": {
+        "tokens": {
+          "input_tokens": 24,
+          "output_tokens": 9351,
+          "cache_creation_input_tokens": 55603,
+          "cache_read_input_tokens": 642830
+        },
+        "usd": 1.323535
+      }
+    }
+  },
+  "per_arm": {
+    "A": {
+      "tokens": {
+        "input_tokens": 12124,
+        "output_tokens": 65975,
+        "cache_creation_input_tokens": 332806,
+        "cache_read_input_tokens": 6974929
+      },
+      "usd": 3.4739382619999994
+    },
+    "B": {
+      "tokens": {
+        "input_tokens": 134,
+        "output_tokens": 86412,
+        "cache_creation_input_tokens": 299318,
+        "cache_read_input_tokens": 4119461
+      },
+      "usd": 9.09328025
+    }
+  },
+  "per_arm_model": {
+    "A": {
+      "claude-sonnet-5": {
+        "tokens": {
+          "input_tokens": 160,
+          "output_tokens": 45643,
+          "cache_creation_input_tokens": 213609,
+          "cache_read_input_tokens": 5175795
+        },
+        "usd": 2.0259315
+      },
+      "claude-haiku-4-5-20251001": {
+        "tokens": {
+          "input_tokens": 196,
+          "output_tokens": 4870,
+          "cache_creation_input_tokens": 46884,
+          "cache_read_input_tokens": 880676
+        },
+        "usd": 0.17121859999999997
+      },
+      "claude-opus-5": {
+        "tokens": {
+          "input_tokens": 32,
+          "output_tokens": 14598,
+          "cache_creation_input_tokens": 72313,
+          "cache_read_input_tokens": 918458
+        },
+        "usd": 1.2762952499999998
+      },
+      "jev-latest": {
+        "tokens": {
+          "input_tokens": 11736,
+          "output_tokens": 864,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0
+        },
+        "usd": 0.000492912
+      }
+    },
+    "B": {
+      "claude-fable-5-1": {
+        "tokens": {
+          "input_tokens": 134,
+          "output_tokens": 86412,
+          "cache_creation_input_tokens": 299318,
+          "cache_read_input_tokens": 4119461
+        },
+        "usd": 9.09328025
+      }
+    }
+  },
+  "grand_total_usd": {
+    "A": 3.4739382619999994,
+    "B": 9.09328025
+  },
+  "cache_write_fallback": {},
+  "guardrails": {
+    "A/task1": {
+      "service_tier": [
+        "standard"
+      ],
+      "inference_geo": [
+        "not_available"
+      ],
+      "speed": [
+        "standard"
+      ]
+    },
+    "A/task2": {
+      "service_tier": [
+        "standard"
+      ],
+      "inference_geo": [
+        "not_available"
+      ],
+      "speed": [
+        "standard"
+      ]
+    },
+    "A/task3": {
+      "service_tier": [
+        "standard"
+      ],
+      "inference_geo": [
+        "not_available"
+      ],
+      "speed": [
+        "standard"
+      ]
+    },
+    "A/task4": {
+      "service_tier": [
+        "standard"
+      ],
+      "inference_geo": [
+        "not_available"
+      ],
+      "speed": [
+        "standard"
+      ]
+    },
+    "B/task1": {
+      "service_tier": [
+        "standard"
+      ],
+      "inference_geo": [
+        "not_available"
+      ],
+      "speed": [
+        "standard"
+      ]
+    },
+    "B/task2": {
+      "service_tier": [
+        "standard"
+      ],
+      "inference_geo": [
+        "not_available"
+      ],
+      "speed": [
+        "standard"
+      ]
+    },
+    "B/task3": {
+      "service_tier": [
+        "standard"
+      ],
+      "inference_geo": [
+        "not_available"
+      ],
+      "speed": [
+        "standard"
+      ]
+    },
+    "B/task4": {
+      "service_tier": [
+        "standard"
+      ],
+      "inference_geo": [
+        "not_available"
+      ],
+      "speed": [
+        "standard"
+      ]
+    }
+  }
+}

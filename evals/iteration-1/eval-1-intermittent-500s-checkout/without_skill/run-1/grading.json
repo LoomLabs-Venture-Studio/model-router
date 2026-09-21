@@ -1,0 +1,107 @@
+{
+  "run": "without_skill",
+  "eval_id": 1,
+  "eval_name": "intermittent-500s-checkout",
+  "note": "No transcript file was provided for this run; graded entirely from outputs/decision.md (the only output file present), cross-checked against the actual fixture repo at /home/claude/complexity-workspace/fixture/shopapi.",
+  "expectations": [
+    {
+      "text": "States all seven complexity scores (S, R, A, K, I, P, V) explicitly with values",
+      "passed": false,
+      "evidence": "No complexity-score notation appears anywhere in decision.md. A full-text search for the S/R/A/K/I/P/V letter-plus-digit pattern and for 'complexity', 'difficulty', 'tier', 'score' finds only unrelated matches (file paths containing the word 'complexity-workspace', the commit hash). The routing rationale (section 3) reasons qualitatively ('small enough', 'coupled and short') but never assigns or states the seven-dimension scores."
+    },
+    {
+      "text": "The executing model for the diagnosis/fix is opus or fable (not haiku or sonnet)",
+      "passed": true,
+      "evidence": "decision.md:29 'Piece A: diagnosis \u2014 done inline (fable, this session)' and decision.md:33 'Piece B: fix + repro test \u2014 inline (fable, this session)' both explicitly name Fable as the session doing the diagnosis and fix; the separately-dispatched verifier is at 'model opus' (decision.md:55). No diagnosis or fix work is attributed to haiku or sonnet."
+    },
+    {
+      "text": "Includes a scoping or diagnosis step before committing to a fix approach",
+      "passed": true,
+      "evidence": "Section 1 opens with 'What I found. I read the whole codebase (it is 11 files)' followed by three numbered root-cause findings with file:line citations (decision.md:9-15), and only then states 'How I will handle it: fix inline, then one verifier subagent' (decision.md:17). Verified independently against /home/claude/complexity-workspace/fixture/shopapi \u2014 the file:line citations (checkout.py:18-21, checkout.py:16, db.py's shared connection and unused _lock) match the real source."
+    },
+    {
+      "text": "Adds an independent verifier that receives the diff and the task but not the reasoning behind the fix",
+      "passed": false,
+      "evidence": "The Piece C verifier brief (decision.md:57-126) contains an explicit 'CLAIMED ROOT CAUSES (verify each independently; do not take my word for it)' section spelling out all three diagnosed bugs in full (decision.md:68-71), followed by a 'CLAIMED FIX' section (decision.md:73) describing exactly how the fix addresses each one. This hands the verifier the complete reasoning/explanation behind the fix before it looks at any code \u2014 the brief's own framing ('do not take my word for it') does not undo the fact that the word was already given. This is the opposite of a blind review and fails the independence requirement as strictly defined."
+    },
+    {
+      "text": "Names a review/merge gate and rules out a direct deploy, acknowledging the payments/data risk",
+      "passed": true,
+      "evidence": "'Human gate: at merge, not before the fix. I will hand back a diff plus before/after evidence from the verifier, not a deploy.' (decision.md:23). Payments/data risk is acknowledged earlier in the same section: the _inflight race 'also double-charges (both requests read the cart, both insert a payments row, both clear the cart)' (decision.md:11), and the verifier brief separately calls the payments table 'money-adjacent data' (decision.md context around line 62-66)."
+    },
+    {
+      "text": "Does not fan the diagnosis out to parallel agents",
+      "passed": true,
+      "evidence": "'No fan-out. The three defects share two files and one repro harness; parallel agents would collide on the same lines and each would need the full read I have already done.' (decision.md:132, under 'Not dispatched'). Diagnosis and fix are both done inline by the single session; exactly one verifier subagent is dispatched afterward \u2014 no parallel Agent/Task calls."
+    },
+    {
+      "text": "The decision is recorded in a machine-readable log with an id (decisions.jsonl contains a decision line)",
+      "passed": false,
+      "evidence": "outputs/ for this run contains only decision.md \u2014 no decisions.jsonl file exists anywhere under /home/claude/complexity-workspace/iteration-1/intermittent-500s-checkout/without_skill/outputs (confirmed by directory listing), and decision.md never mentions a decision id or a machine-readable log at all."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 3,
+    "total": 7,
+    "pass_rate": 0.57
+  },
+  "execution_metrics": {
+    "output_files": [
+      "decision.md"
+    ],
+    "output_chars": 15507,
+    "transcript_available": false
+  },
+  "claims": [
+    {
+      "claim": "The repo is 11 source files, 1 migration, and 2 tests",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Matches the 11 Python files, 1 migration (001_init.sql), and 2 test files in the fixture repo exactly. Note this framing omits README.md, so 'the whole codebase' is actually 15 files including it (also confirmed by this run's own opening line 'I read the whole codebase (it is 11 files)', which undercounts by one) \u2014 a minor scope inconsistency, not a factual error in the counts given."
+    },
+    {
+      "claim": "checkout.py:18-21 \u2014 the _inflight dict is set and del'd, never checked, never locked, causing a KeyError/500 and a double-charge on overlapping same-user requests",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Matches checkout.py lines 8,18,21 exactly, and db.py's _lock is confirmed unused, so the described race and its double-charge consequence are real."
+    },
+    {
+      "claim": "'You are an independent verifier... verify each independently; do not take my word for it' (the verifier brief's own self-description of its independence)",
+      "type": "quality",
+      "verified": false,
+      "evidence": "The same brief that asks for independent verification immediately supplies the full claimed root causes and claimed fix in dedicated 'CLAIMED ROOT CAUSES' / 'CLAIMED FIX' sections \u2014 exactly the reasoning independence is supposed to be blind to. The brief is not actually independent by the task's own definition, despite describing itself that way."
+    },
+    {
+      "claim": "The fix is roughly 40 lines across two files plus one new test file",
+      "type": "factual",
+      "verified": false,
+      "evidence": "git status/git diff on the fixture repo at /home/claude/complexity-workspace/fixture/shopapi show zero changes \u2014 no fix was actually written to disk in this run, so the 40-line estimate is an unverified prediction, not a measured diff."
+    },
+    {
+      "claim": "POST /admin/users/{id}/tier never calls require_admin (flagged as a separate, out-of-scope security issue)",
+      "type": "factual",
+      "verified": true,
+      "evidence": "admin.py's set_tier() takes require_auth but never calls require_admin(token), unlike all_users() on the line above which does call it."
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "Adds an independent verifier that receives the diff and the task but not the reasoning behind the fix",
+        "reason": "This assertion did real discriminating work here: it correctly caught a plan that performs an otherwise-solid diagnosis and process but explicitly leaks the full root-cause/fix reasoning to its own 'independent' verifier via 'CLAIMED ROOT CAUSES' / 'CLAIMED FIX' sections. Worth keeping exactly as strict as it is \u2014 a softer reading ('mentions independence') would have let this pass."
+      },
+      {
+        "assertion": "The decision is recorded in a machine-readable log with an id (decisions.jsonl contains a decision line)",
+        "reason": "Also cleanly discriminating: this run produced a thorough, well-reasoned plan but no machine-readable log at all, which the strict file-existence check catches unambiguously."
+      },
+      {
+        "reason": "No assertion checks whether the diagnosis is factually correct against the actual codebase. This run's diagnosis happens to be accurate when checked against /home/claude/complexity-workspace/fixture/shopapi (file:line citations for the _inflight race, the unused db.py lock, and the missing admin.set_tier auth check all verify), but nothing in the assertion list would catch a run whose root cause was plausible-sounding but wrong, since the other checks (model tier, gate, no-fan-out) don't depend on diagnostic correctness."
+      },
+      {
+        "reason": "Because there is no transcript, process assertions ('no fan-out', 'executing model is opus/fable', 'diagnosis before fix') are graded entirely from the document's own narration of what it did, not from an actual tool-call log. That is a real limitation for this eval design in general, not specific to this run."
+      }
+    ],
+    "overall": "This run is a genuinely strong, well-reasoned engineering plan \u2014 the diagnosis is accurate down to the file:line, the inline-vs-verifier routing logic is sound, and the merge gate correctly identifies the payments risk \u2014 but it fails exactly the three mechanical/procedural requirements the skill is presumably meant to instill: explicit multi-dimensional complexity scoring, a machine-readable decision log with an id, and a verifier that is actually kept blind to the fix's reasoning rather than merely told to act like it is. The independent-verifier failure is the most consequential: it silently defeats the whole point of having a second reviewer."
+  }
+}
